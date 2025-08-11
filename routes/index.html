@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en" class="light-theme">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tukopax — Secure AI Escrow Platform</title>
+
+  <!-- Bootstrap CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --text-dark: #eee;
+      --text-light: #212529;
+      --glass-bg-light: rgba(255, 255, 255, 0.1);
+      --glass-bg-dark: rgba(0, 0, 0, 0.6);
+      --blur: blur(15px);
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--white);
+      color: var(--black);
+      transition: background 0.4s ease, color 0.4s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      perspective: 1500px;
+      overflow-x: hidden;
+    }
+    body.dark-theme {
+      background: var(--black);
+      color: var(--text-dark);
+    }
+
+    /* Page flip animation container */
+    #pageFlipWrapper {
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 1s ease;
+    }
+
+    body.flip #pageFlipWrapper {
+      animation: pageFlip 1s forwards;
+    }
+
+    @keyframes pageFlip {
+      0% {
+        transform: rotateY(0deg);
+      }
+      100% {
+        transform: rotateY(180deg);
+      }
+    }
+
+    /* Navbar */
+    nav.navbar {
+      background: var(--glass-bg-light);
+      backdrop-filter: var(--blur);
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      padding: 1rem 2rem;
+      transition: background 0.4s ease, border-color 0.4s ease;
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+    }
+    body.dark-theme nav.navbar {
+      background: var(--glass-bg-dark);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .navbar .logo {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: inherit;
+    }
+    .navbar .nav-link {
+      color: var(--black);
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+    body.dark-theme .navbar .nav-link {
+      color: var(--white);
+    }
+    .navbar .nav-link:hover {
+      color: var(--text-dark);
+    }
+    body.dark-theme .navbar .nav-link:hover {
+      color: var(--white);
+    }
+
+    /* Hero Section */
+    header.hero {
+      text-align: center;
+      padding: 5rem 1rem 4rem;
+      background: var(--glass-bg-light);
+      margin-bottom: 3rem;
+      backdrop-filter: var(--blur);
+      border-radius: 1rem;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+      transition: background 0.4s ease;
+    }
+    body.dark-theme header.hero {
+      background: var(--glass-bg-dark);
+    }
+    header.hero h1 {
+      font-weight: 800;
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+    header.hero p {
+      font-size: 1.25rem;
+      margin-bottom: 2rem;
+      color: var(--black);
+    }
+    body.dark-theme header.hero p {
+      color: var(--text-dark);
+    }
+    .cta-button {
+      background: var(--black);
+      color: var(--white);
+      padding: 0.75rem 2.5rem;
+      font-weight: 700;
+      border-radius: 50px;
+      border: 2px solid var(--black);
+      transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .cta-button:hover, .cta-button:focus {
+      background: var(--white);
+      color: var(--black);
+      border-color: var(--black);
+      transform: translateY(-3px);
+      outline: none;
+      text-decoration: none;
+    }
+    body.dark-theme .cta-button {
+      background: var(--white);
+      color: var(--black);
+      border: 2px solid var(--white);
+    }
+    body.dark-theme .cta-button:hover, body.dark-theme .cta-button:focus {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--white);
+    }
+
+    /* Features Section */
+    section.features {
+      max-width: 900px;
+      margin: 0 auto 4rem;
+      padding: 0 1rem;
+      text-align: center;
+    }
+    section.features h2 {
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+    .features .card {
+      background: var(--glass-bg-light);
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+      backdrop-filter: var(--blur);
+      border: 1px solid rgba(0,0,0,0.1);
+      transition: background 0.4s ease, border-color 0.4s ease;
+      color: var(--black);
+      height: 100%;
+    }
+    body.dark-theme .features .card {
+      background: var(--glass-bg-dark);
+      border-color: rgba(255,255,255,0.15);
+      color: var(--text-dark);
+      box-shadow: 0 6px 20px rgba(255,255,255,0.1);
+    }
+    .features .card h3 {
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .features .card p {
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    /* Testimonials Section */
+    section.testimonials {
+      max-width: 900px;
+      margin: 0 auto 4rem;
+      position: relative;
+    }
+    section.testimonials h2 {
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+
+    /* Carousel Wheel Container */
+    .testimonial-wheel {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      margin: 0 auto;
+      transform-style: preserve-3d;
+      animation: rotateWheel 40s linear infinite; /* Slower rotation */
+      transform-origin: 50% 90px;
+    }
+    /* Each testimonial card positioned around circle */
+    .testimonial-wheel > .testimonial-item {
+      position: absolute;
+      width: 100%;
+      max-width: 600px;
+      left: 50%;
+      top: 50%;
+      padding: 1rem 2rem;
+      border-radius: 1rem;
+      background: var(--glass-bg-light);
+      border: 1px solid rgba(0,0,0,0.15);
+      backdrop-filter: var(--blur);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      color: var(--black);
+      transform-origin: center bottom;
+      opacity: 0.85;
+      transition: opacity 0.3s ease;
+      user-select: none;
+      transform-style: preserve-3d;
+    }
+    body.dark-theme .testimonial-wheel > .testimonial-item {
+      background: var(--glass-bg-dark);
+      border-color: rgba(255,255,255,0.15);
+      color: var(--text-dark);
+      box-shadow: 0 8px 30px rgba(255,255,255,0.1);
+    }
+    .testimonial-wheel > .testimonial-item:hover {
+      opacity: 1;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+      cursor: default;
+    }
+    .testimonial-item:nth-child(1) { transform: rotateX(0deg) translateZ(160px) translateX(-50%) translateY(-50%); }
+    .testimonial-item:nth-child(2) { transform: rotateX(90deg) translateZ(160px) translateX(-50%) translateY(-50%); }
+    .testimonial-item:nth-child(3) { transform: rotateX(180deg) translateZ(160px) translateX(-50%) translateY(-50%); }
+    .testimonial-item:nth-child(4) { transform: rotateX(270deg) translateZ(160px) translateX(-50%) translateY(-50%); }
+
+    @keyframes rotateWheel {
+      0% { transform: rotateX(0deg); }
+      100% { transform: rotateX(360deg); }
+    }
+
+    /* Testimonial blockquote style */
+    .testimonial-item blockquote {
+      font-style: italic;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    .testimonial-item span {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--black);
+    }
+    body.dark-theme .testimonial-item span {
+      color: var(--text-dark);
+    }
+
+    /* CTA Section */
+    section.cta {
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      padding: 2rem 1rem;
+      background: var(--glass-bg-light);
+      backdrop-filter: var(--blur);
+      border-radius: 1rem;
+      text-align: center;
+      transition: background 0.4s ease;
+    }
+    body.dark-theme section.cta {
+      background: var(--glass-bg-dark);
+    }
+    section.cta h2 {
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    section.cta p {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Footer */
+    footer.footer {
+      text-align: center;
+      padding: 1rem 0;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      font-size: 0.9rem;
+      color: var(--black);
+      transition: color 0.4s ease, border-color 0.4s ease;
+    }
+    body.dark-theme footer.footer {
+      color: var(--text-dark);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      cursor: pointer;
+      font-size: 1.8rem;
+      background: none;
+      border: none;
+      color: inherit;
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1050;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.8rem;
+      height: 2.8rem;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      background-color: transparent;
+      box-shadow: 0 0 8px transparent;
+      transition: box-shadow 0.3s ease, color 0.3s ease;
+    }
+    .theme-toggle:hover, .theme-toggle:focus {
+      box-shadow: 0 0 12px currentColor;
+      outline: none;
+    }
+  
+.testimonial-wheel > .testimonial-item {
+  transition: opacity 1s ease-in-out;
+}
+.testimonial-wheel.paused {
+  animation-play-state: paused;
+}
+</style>
+</head>
+<body>
+
+  <div id="pageFlipWrapper">
+    <nav class="navbar d-flex justify-content-between align-items-center">
+      <div class="logo">Tukopax</div>
+      <ul class="nav nav-pills gap-3 mb-0">
+        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link" href="#testimonials">Testimonials</a></li>
+        <li class="nav-item"><a class="nav-link btn btn-outline-dark dark-theme-btn" href="auth.html">Get Started</a></li>
+      </ul>
+    </nav>
+
+    <header class="hero">
+      <h1>Trade with Peace</h1>
+      <p>Your AI-powered escrow partner for secure, seamless transactions.</p>
+      <a href="auth.html" class="cta-button">Join the Beta</a>
+    </header>
+
+    <section class="features" id="features">
+      <h2>Why Tukopax?</h2>
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col">
+          <div class="card features-card h-100">
+            <div class="card-body">
+              <h3 class="card-title">Secure Payments</h3>
+              <p class="card-text">Funds are held safely until both sides are satisfied.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card features-card h-100">
+            <div class="card-body">
+              <h3 class="card-title">Verified Sellers</h3>
+              <p class="card-text">We ensure legitimacy before listing any service or product.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card features-card h-100">
+            <div class="card-body">
+              <h3 class="card-title">AI Matching</h3>
+              <p class="card-text">Smart algorithms connect you with your ideal buyer or seller.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="testimonials" id="testimonials" aria-label="Testimonials Carousel">
+      <h2>Trusted by Early Users</h2>
+      <div class="card shadow-lg border-0 mx-auto" style="max-width: 720px; overflow: hidden;">
+        <div class="card-body d-flex justify-content-center align-items-center" style="height: 220px; position: relative;">
+          <div class="testimonial-wheel" aria-live="polite" aria-atomic="true">
+            <div class="testimonial-item" role="group" aria-roledescription="testimonial" aria-label="Testimonial 1">
+              <blockquote>“I felt completely at ease selling online with Tukopax. The AI matched me with a serious buyer and the escrow feature was a game changer.”</blockquote>
+              <span>- Amani, Nairobi</span>
+            </div>
+            <div class="testimonial-item" role="group" aria-roledescription="testimonial" aria-label="Testimonial 2">
+              <blockquote>“The escrow system gave me confidence I never had before in online transactions.”</blockquote>
+              <span>- Grace, Mombasa</span>
+            </div>
+            <div class="testimonial-item" role="group" aria-roledescription="testimonial" aria-label="Testimonial 3">
+              <blockquote>“Tukopax’s AI matching saved me time and connected me to the perfect buyer.”</blockquote>
+              <span>- Kamau, Kisumu</span>
+            </div>
+            <div class="testimonial-item" role="group" aria-roledescription="testimonial" aria-label="Testimonial 4">
+              <blockquote>“A seamless, trustworthy experience — finally a platform that understands security.”</blockquote>
+              <span>- Fatuma, Nairobi</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta" id="cta">
+      <h2>Start Transacting Smarter</h2>
+      <p>Join our early access and be part of the secure commerce revolution.</p>
+      <a href="signup.html" class="cta-button">Request Invite</a>
+    </section>
+
+    <footer class="footer">
+      <p>&copy; 2025 Tukopax. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- Theme Toggle Button -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <i class="bi bi-moon-fill"></i>
+  </button>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const pageFlipWrapper = document.getElementById('pageFlipWrapper');
+
+    // Load saved theme or default light
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('tukopaxTheme') || 'light-theme';
+      if(savedTheme === 'dark-theme'){
+        body.classList.add('dark-theme');
+        updateToggleIcon('dark-theme');
+      } else {
+        body.classList.add('light-theme');
+        updateToggleIcon('light-theme');
+      }
+    });
+
+    themeToggle.addEventListener('click', () => {
+      // Add flip class to trigger animation
+      body.classList.add('flip');
+
+      // After animation ends toggle theme and remove flip
+      setTimeout(() => {
+        body.classList.toggle('dark-theme');
+        body.classList.toggle('light-theme');
+        const currentTheme = body.classList.contains('dark-theme') ? 'dark-theme' : 'light-theme';
+        localStorage.setItem('tukopaxTheme', currentTheme);
+        updateToggleIcon(currentTheme);
+
+        // Remove flip class so animation can be triggered again next time
+        body.classList.remove('flip');
+      }, 1000); // animation duration 1s
+    });
+
+    function updateToggleIcon(theme) {
+      if (theme === 'dark-theme') {
+        themeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+      } else {
+        themeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
+      }
+    }
+  
+    // Pause on hover/touch for testimonial wheel
+    const testimonialWheel = document.querySelector('.testimonial-wheel');
+    testimonialWheel.addEventListener('mouseenter', () => {
+      testimonialWheel.classList.add('paused');
+    });
+    testimonialWheel.addEventListener('mouseleave', () => {
+      testimonialWheel.classList.remove('paused');
+    });
+    testimonialWheel.addEventListener('touchstart', () => {
+      testimonialWheel.classList.add('paused');
+    });
+    testimonialWheel.addEventListener('touchend', () => {
+      testimonialWheel.classList.remove('paused');
+    });
+    // Swipe navigation for testimonial wheel
+    let startY = 0;
+    testimonialWheel.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+    });
+    testimonialWheel.addEventListener('touchend', (e) => {
+      let endY = e.changedTouches[0].clientY;
+      let deltaY = endY - startY;
+      if (Math.abs(deltaY) > 50) { // swipe threshold
+        testimonialWheel.style.animation = 'none';
+        let currentRotation = testimonialWheel.dataset.rotation ? parseInt(testimonialWheel.dataset.rotation) : 0;
+        if (deltaY > 0) {
+          currentRotation -= 90; // swipe down
+        } else {
+          currentRotation += 90; // swipe up
+        }
+        testimonialWheel.style.transform = `rotateX(${currentRotation}deg)`;
+        testimonialWheel.dataset.rotation = currentRotation;
+        setTimeout(() => {
+          testimonialWheel.style.animation = '';
+        }, 500);
+      }
+    });
+
+</script>
+</body>
+</html>

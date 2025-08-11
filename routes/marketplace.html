@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tukopax — Ninja Vault Marketplace (Black & White)</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+<!-- Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+
+<style>
+/* ==========================
+   TUKOPAX NINJA — MONOCHROME
+   ========================== */
+
+/* Variables */
+:root{
+  --bg-light:#ffffff;
+  --bg-dark:#000000;
+  --fg-light:#0b0b0b;
+  --fg-dark:#ffffff;
+  --muted-light:#6c757d;
+  --muted-dark:#bdbdbd;
+  --card-radius:14px;
+  --glass-weak: rgba(255,255,255,0.04);
+  --glass-strong: rgba(0,0,0,0.12);
+  --accent: #fff; /* only used for highlights in mono */
+  --flip-duration: 820ms;
+  --max-w: 1360px;
+}
+
+/* Base */
+html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; background:var(--bg-light); color:var(--fg-light); transition: background var(--flip-duration) ease, color var(--flip-duration) ease; }
+body.dark{ background:var(--bg-dark); color:var(--fg-dark); }
+
+/* page-wrap for flip on theme change only */
+#page-wrap{ transform-style:preserve-3d; transition: transform var(--flip-duration) cubic-bezier(.2,.9,.25,1); min-height:100vh; }
+body.flip #page-wrap{ transform: rotateY(180deg); }
+
+/* Header / Nav */
+.site-header{ position:sticky; top:0; z-index:2000; padding:.6rem 0; backdrop-filter: blur(6px); background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.7)); border-bottom:1px solid rgba(0,0,0,0.06); }
+body.dark .site-header{ background: linear-gradient(180deg, rgba(0,0,0,0.82), rgba(0,0,0,0.6)); border-bottom-color: rgba(255,255,255,0.06); }
+
+.navbar-inner{ max-width:var(--max-w); margin:0 auto; padding:0 1rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+
+.brand{ font-weight:900; letter-spacing:-.02em; font-size:1.02rem; display:flex; align-items:center; gap:.6rem; }
+.brand small{ display:block; font-size:.66rem; font-weight:700; opacity:.86; margin-top:2px; }
+
+/* Theme pill */
+.theme-toggle{ border-radius:999px; padding:.45rem .9rem; border:2px solid currentColor; background:transparent; display:inline-flex; gap:.6rem; align-items:center; cursor:pointer; font-weight:800; }
+.theme-toggle:active{ transform:scale(.985); }
+
+/* Ticker */
+.bid-ticker{ display:flex; gap:1.2rem; align-items:center; overflow:hidden; white-space:nowrap; padding:.35rem .6rem; border-radius:12px; border:1px solid rgba(0,0,0,0.05); font-weight:800; max-width:560px; }
+body.dark .bid-ticker{ border-color: rgba(255,255,255,0.04); }
+
+/* Container */
+.container-main{ max-width:var(--max-w); margin:1.25rem auto; padding:0 1rem; }
+
+/* Layout */
+.layout{ display:grid; grid-template-columns: 1fr 380px; gap:1.25rem; align-items:start; }
+@media (max-width:1100px){ .layout{ grid-template-columns:1fr; } }
+
+/* Card base */
+.card-mono{ border-radius:var(--card-radius); border:1px solid rgba(0,0,0,0.06); background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96)); box-shadow: 0 12px 36px rgba(0,0,0,0.06); transition: transform .22s ease, box-shadow .22s ease, border-color var(--flip-duration) ease; }
+body.dark .card-mono{ background: linear-gradient(180deg, rgba(0,0,0,0.78), rgba(0,0,0,0.56)); border-color: rgba(255,255,255,0.06); box-shadow: 0 10px 28px rgba(255,255,255,0.02); }
+
+/* Hero / Auction */
+.auction-hero{ display:flex; gap:1rem; align-items:center; padding:1.1rem; border-radius:14px; }
+.auction-image{ width:48%; min-width:240px; height:340px; border-radius:12px; overflow:hidden; background:#eaeaea; display:flex; align-items:center; justify-content:center; }
+.auction-image img{ width:100%; height:100%; object-fit:cover; transition: transform .65s cubic-bezier(.2,.9,.25,1); }
+.auction-image:hover img{ transform: scale(1.03); }
+
+.auction-meta{ flex:1; display:flex; flex-direction:column; gap:.65rem; }
+
+/* Timer ring */
+.timer-ring{ width:84px; height:84px; display:grid; place-items:center; border-radius:50%; border:2px solid rgba(0,0,0,0.06); }
+
+/* Small carousel row */
+.carousel-small{ display:flex; gap:.75rem; align-items:center; overflow:hidden; }
+
+/* Grid */
+.grid{ display:grid; gap:1rem; grid-template-columns: repeat(4,1fr); }
+@media (max-width:1100px){ .grid{ grid-template-columns: repeat(3,1fr); } }
+@media (max-width:780px){ .grid{ grid-template-columns: repeat(2,1fr); } }
+@media (max-width:420px){ .grid{ grid-template-columns: 1fr; } }
+
+.product{ display:flex; flex-direction:column; height:100%; overflow:hidden; border-radius:12px; border:1px solid rgba(0,0,0,0.04); background:transparent; }
+.product .img{ height:170px; overflow:hidden; background:#f3f3f3; }
+.product img{ width:100%; height:100%; object-fit:cover; transition: transform .45s; }
+.product:hover img{ transform:scale(1.06); }
+.product .body{ padding:.75rem; display:flex; flex-direction:column; gap:.4rem; flex:1; }
+
+/* Price animation helper */
+.price-anim { font-weight:900; font-size:1rem; }
+
+/* BidVault */
+.bidvault-list{ max-height:520px; overflow:auto; padding:.4rem; border-radius:10px; border:1px solid rgba(0,0,0,0.05); }
+.bidvault-item{ padding:.6rem; border-radius:10px; border:1px solid rgba(0,0,0,0.04); margin-bottom:.6rem; background:transparent; }
+
+/* Micro UI */
+.muted{ color:var(--muted-light); }
+body.dark .muted{ color:var(--muted-dark); }
+.badge-mini{ padding:.2rem .5rem; border-radius:999px; border:1px solid rgba(0,0,0,0.06); font-weight:800; font-size:.78rem; }
+
+/* Focus outlines */
+button:focus, a:focus, input:focus{ outline:3px solid rgba(0,0,0,0.06); outline-offset:3px; }
+body.dark button:focus, body.dark a:focus, body.dark input:focus{ outline:3px solid rgba(255,255,255,0.06); }
+
+/* Reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important; scroll-behavior:auto !important; }
+}
+
+/* Footer */
+.site-footer{ max-width:var(--max-w); margin:2rem auto; color:var(--muted-light); padding:1rem; text-align:center; }
+
+/* Responsive tweaks */
+@media (max-width:900px){
+  .auction-image{ height:220px; width:100%; }
+  .auction-hero{ flex-direction:column; align-items:stretch; }
+  .layout aside{ order:2; }
+}
+
+/* small decoration for dark mode - subtle diagonal lines when dark */
+body.dark::before{
+  content:"";
+  position:fixed; inset:0; background-image: linear-gradient(135deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 24px 24px; pointer-events:none; opacity:0.03;
+}
+
+</style>
+</head>
+<body>
+  <!-- Theme & UI root (page-flip wrapper) -->
+  <div id="page-wrap">
+    <!-- Header -->
+    <header class="site-header">
+      <div class="navbar-inner">
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <div class="brand">Tukopax <small>Vault Marketplace</small></div>
+          <nav class="d-none d-md-block">
+            <a href="dashboard.html" class="me-3 nav-link-link" data-route>Home</a>
+            <a href="#marketplace" class="me-3 nav-link-link" data-route>Marketplace</a>
+            <a href="#bidvault" class="me-3 nav-link-link" data-route>BidVault</a>
+            <a href="#profile" class="me-3 nav-link-link" data-route>Profile</a>
+            <a href="#about" class="me-3 nav-link-link" data-route>About</a>
+          </nav>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:.6rem;">
+          <div class="bid-ticker d-none d-md-flex" id="bidTicker" aria-hidden="true"></div>
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme (flip)"> <i class="bi bi-arrow-repeat"></i> Theme</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main container -->
+    <main class="container-main" id="appMain">
+
+      <!-- HOME -->
+      <section id="page-home" class="page-section">
+        <div class="card-mono p-3 mb-3">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <h1 style="margin:0;font-weight:900;">Tukopax — Live Vault</h1>
+              <div class="muted small">Broker-grade marketplace meets live auctions — black & white only.</div>
+            </div>
+            <div class="muted small">Demo • Simulated stream</div>
+          </div>
+        </div>
+
+        <div class="layout">
+          <div>
+            <!-- Auction hero -->
+            <section class="card-mono p-3 mb-3 auction-hero" aria-live="polite">
+              <div class="auction-image" id="auctionImage"><img src="" alt="Featured auction"></div>
+              <div class="auction-meta">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div>
+                    <h2 id="auctionTitle">Loading auction…</h2>
+                    <div class="muted" id="auctionDesc">—</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="timer-ring" id="timerRing"><div id="auctionTimer">00:00</div></div>
+                    <div class="muted small">Ends in</div>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;align-items:center;margin-top:.6rem;">
+                  <div>
+                    <div class="muted small">Current Bid</div>
+                    <div class="price-anim" id="auctionPrice">$0</div>
+                    <div class="muted small" id="auctionStock">Stock: -</div>
+                  </div>
+
+                  <div style="margin-left:auto;display:flex;gap:.6rem;">
+                    <button class="btn btn-dark btn-lg" id="bidNowBtn"><i class="bi bi-gavel"></i> Bid Now</button>
+                    <button class="btn btn-outline-dark btn-lg" id="watchBtn"><i class="bi bi-eye"></i> Watch</button>
+                  </div>
+                </div>
+
+                <div class="mt-3 carousel-small" id="carouselSmall" aria-hidden="true"></div>
+              </div>
+            </section>
+
+            <!-- Trending & previews -->
+            <div class="card-mono p-3 mb-3">
+              <h5 style="margin:0 0 .75rem 0;font-weight:900;">Trending Deals</h5>
+              <div id="trendingStrip" style="display:flex;gap:.8rem;overflow:auto;padding-bottom:.25rem;"></div>
+            </div>
+
+            <div class="card-mono p-3 mb-3">
+              <h5 style="margin:0 0 .75rem 0;font-weight:900;">Marketplace Snapshot</h5>
+              <div id="previewGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;"></div>
+            </div>
+          </div>
+
+          <aside>
+            <div class="card-mono p-3 mb-3">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><strong>BidVault</strong><div class="muted small">Closed bids & winners</div></div>
+                <div class="muted small">History</div>
+              </div>
+              <div class="bidvault-list mt-2" id="bidVaultList" aria-live="polite"></div>
+            </div>
+
+            <div class="card-mono p-3">
+              <div class="h6">Vault Quick</div>
+              <div class="muted small mb-2">Deposit to secure funds for purchases.</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem;border-radius:10px;border:1px solid rgba(0,0,0,0.04);margin-bottom:.5rem;">
+                <div><div class="muted small">Status</div><div id="vaultStatusLine">No deposit</div></div>
+                <div id="vaultLock" style="width:78px;height:78px;border-radius:10px;border:2px solid;display:grid;place-items:center;"><i class="bi bi-shield-lock-fill"></i></div>
+              </div>
+              <input id="vaultAmount" class="form-control form-control-sm mb-2" type="number" value="1200">
+              <div style="display:flex;gap:.5rem;">
+                <button class="btn btn-dark btn-sm" id="depositBtn">Deposit</button>
+                <button class="btn btn-outline-dark btn-sm" id="cancelDepositBtn" disabled>Cancel</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- MARKETPLACE -->
+      <section id="page-marketplace" class="page-section" style="display:none;">
+        <div class="card-mono p-3 mb-3" style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <h2 style="margin:0;font-weight:900;">Marketplace</h2>
+            <div class="muted small">Buy now or join live bids.</div>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:center;">
+            <input id="marketSearch" class="form-control form-control-sm" placeholder="Search products…" style="width:280px;" />
+            <select id="marketSort" class="form-select form-select-sm" style="width:160px;">
+              <option value="popular">Popular</option>
+              <option value="price_low">Price Low → High</option>
+              <option value="price_high">Price High → Low</option>
+              <option value="new">Newest</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card-mono p-3 mb-3">
+          <h5 style="margin:0 0 .75rem 0;font-weight:900;">All Listings</h5>
+          <div id="productGrid" class="grid"></div>
+          <div class="text-center mt-3"><button class="btn btn-outline-dark" id="loadMoreBtn">Load more</button></div>
+        </div>
+      </section>
+
+      <!-- BIDVAULT (detailed) -->
+      <section id="page-bidvault" class="page-section" style="display:none;">
+        <div class="card-mono p-3 mb-3">
+          <h2 style="margin:0;font-weight:900;">BidVault — Closed Auctions</h2>
+          <div class="muted small">All closed auctions, winners, and bid history.</div>
+        </div>
+        <div class="card-mono p-3">
+          <div id="bidVaultDetailList"></div>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section id="page-profile" class="page-section" style="display:none;">
+        <div class="card-mono p-3 mb-3">
+          <h2 style="margin:0;font-weight:900;">Profile</h2>
+          <div class="muted small">Your bids, wins, watchlist.</div>
+        </div>
+        <div class="card-mono p-3">
+          <h5>Your Active Bids</h5>
+          <div id="profileActiveBids" class="mt-2"></div>
+          <h5 class="mt-3">Won Items</h5>
+          <div id="profileWon" class="mt-2 muted">No wins yet (demo).</div>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="page-about" class="page-section" style="display:none;">
+        <div class="card-mono p-3 mb-3">
+          <h2 style="margin:0;font-weight:900;">About Tukopax</h2>
+          <div class="muted small">A demo merging P2P marketplace with live auction dynamics.</div>
+        </div>
+        <div class="card-mono p-3">
+          <p>Built as a polished demo — black & white UI, theme flip, and live-feel auction simulation. Replace fake feed with your backend (WebSocket) and you're production-ready.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- modal root -->
+  <div id="modalRoot" style="position:fixed;inset:0;display:grid;place-items:center;z-index:3000;pointer-events:none;" aria-hidden="true"></div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div>© Tukopax — Vault Marketplace • Demo</div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+  /* ==============================
+     Tukopax Ninja — JS Core
+     - Multi-page routing (hash)
+     - Theme toggle with page flip (only on theme change)
+     - Fake API: auctions, auto-bids, closures -> BidVault
+     - Price animation, ticker, BidVault history
+     - Marketplace grid, product modal, vault deposit flow
+     ============================== */
+
+  // === Short helpers
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const fmt = n => '$' + Number(n).toLocaleString();
+  const now = () => Date.now();
+
+  // === Routing
+  const routes = { '#home':'#page-home', '#marketplace':'#page-marketplace', '#bidvault':'#page-bidvault', '#profile':'#page-profile', '#about':'#page-about' };
+  function showRoute(hash){
+    const target = hash && routes[hash] ? routes[hash] : routes['#home'];
+    Object.values(routes).forEach(sel => { const el = document.querySelector(sel); if(el) el.style.display = (sel === target) ? '' : 'none'; });
+    // nav active
+    $$('[data-route]').forEach(a => a.classList.toggle('active', a.getAttribute('href') === (hash || '#home')));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  window.addEventListener('hashchange', ()=> showRoute(location.hash));
+  showRoute(location.hash);
+
+  // === Theme toggle (page flip only on theme change)
+  const themeToggle = $('#themeToggle');
+  if(localStorage.getItem('tuk_theme') === 'dark') document.body.classList.add('dark');
+  themeToggle.addEventListener('click', () => {
+    if(document.body.classList.contains('flip')) return;
+    document.body.classList.add('flip');
+    const dur = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--flip-duration')) || 820;
+    setTimeout(()=> {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('tuk_theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    }, dur/2);
+    setTimeout(()=> document.body.classList.remove('flip'), dur + 60);
+  });
+
+  // === Fake dataset
+  const BASE = [
+    {id:'iphone15', title:'Apple iPhone 15 Pro', cat:'electronics', price:1099, img:'https://source.unsplash.com/900x600/?iphone,phone', desc:'6.1" • 128GB'},
+    {id:'samsung', title:'Samsung S24 Ultra', cat:'electronics', price:1199, img:'https://source.unsplash.com/900x600/?samsung,phone', desc:'6.8" • 256GB'},
+    {id:'macbook', title:'MacBook Pro 14"', cat:'electronics', price:1999, img:'https://source.unsplash.com/900x600/?macbook,laptop', desc:'M3 Pro • 512GB'},
+    {id:'ps5', title:'Sony PlayStation 5', cat:'gaming', price:499, img:'https://source.unsplash.com/900x600/?playstation,console', desc:'PS5 Disk Edition'},
+    {id:'fridge', title:'Samsung Smart Fridge', cat:'appliances', price:2399, img:'https://source.unsplash.com/900x600/?fridge,kitchen', desc:'Smart fridge • 650L'},
+    {id:'nike', title:'Nike Air Max 270', cat:'fashion', price:150, img:'https://source.unsplash.com/900x600/?nike,sneakers', desc:'Running shoes'},
+    {id:'dji', title:'DJI Mini 4 Pro', cat:'electronics', price:999, img:'https://source.unsplash.com/900x600/?drone,dji', desc:'4K compact drone'},
+    {id:'roomba', title:'Roomba i3', cat:'home', price:299, img:'https://source.unsplash.com/900x600/?robot,vacuum', desc:'Smart vacuum'}
+  ];
+
+  // expand to busy PRODUCTS
+  const PRODUCTS = [];
+  for(let i=0;i<220;i++){
+    const base = BASE[i % BASE.length];
+    const p = { ...base, uid: base.id + '-' + i, title: base.title + (i>0 ? ' ' + (i+1) : ''), price: Math.max(5, Math.round(base.price*(0.8 + Math.random()*0.5))), stock: Math.max(1, 5 + Math.floor(Math.random()*120)) };
+    p.img = base.img + '&' + encodeURIComponent(p.uid);
+    if(Math.random() < 0.14){ p.promo = { pct: [10,15,20,25][Math.floor(Math.random()*4)] }; p.price = Math.round(p.price * (1 - p.promo.pct/100)); }
+    PRODUCTS.push(p);
+  }
+
+  // auctions pool
+  const AUCTIONS = [];
+  for(let i=0;i<14;i++){
+    const p = PRODUCTS[Math.floor(Math.random()*PRODUCTS.length)];
+    const a = JSON.parse(JSON.stringify(p));
+    a.auctionId = 'auc-' + Math.random().toString(36).slice(2,9);
+    a.currentBid = Math.max(5, Math.round(a.price * (0.82 + Math.random()*0.25)));
+    a.endsAt = now() + (90 + Math.floor(Math.random()*420)) * 1000; // 1.5 - 8.5 min
+    a.bids = [];
+    AUCTIONS.push(a);
+  }
+
+  // BidVault closed history (seeded demo)
+  const BIDVAULT = [];
+
+  // === DOM refs
+  const refs = {
+    bidTicker: $('#bidTicker'),
+    auctionImage: $('#auctionImage'),
+    auctionTitle: $('#auctionTitle'),
+    auctionDesc: $('#auctionDesc'),
+    auctionPrice: $('#auctionPrice'),
+    auctionTimer: $('#auctionTimer'),
+    auctionStock: $('#auctionStock'),
+    carouselSmall: $('#carouselSmall'),
+    bidVaultList: $('#bidVaultList'),
+    trendingStrip: $('#trendingStrip'),
+    previewGrid: $('#previewGrid'),
+    productGrid: $('#productGrid'),
+    loadMoreBtn: $('#loadMoreBtn'),
+    marketSearch: $('#marketSearch'),
+    marketSort: $('#marketSort'),
+    vaultStatusLine: $('#vaultStatusLine'),
+    vaultAmount: $('#vaultAmount'),
+    depositBtn: $('#depositBtn'),
+    cancelDepositBtn: $('#cancelDepositBtn'),
+    vaultLock: $('#vaultLock'),
+    bidVaultDetailList: $('#bidVaultDetailList'),
+    profileActiveBids: $('#profileActiveBids'),
+    profileWon: $('#profileWon')
+  };
+
+  // state
+  let currentAuctionIndex = 0;
+  let shownProducts = 0;
+  const PER_PAGE = 36;
+  let staged = null;
+  let ORDERS = [];
+  let TX_DAY = 0;
+
+  // === utility: count up animation for price
+  function animateNum(el, from, to, duration=430){
+    if(from === to){ el.textContent = fmt(to); return; }
+    const start = performance.now();
+    function frame(t){
+      const progress = Math.min(1, (t - start) / duration);
+      const val = Math.round(from + (to - from) * progress);
+      el.textContent = fmt(val);
+      if(progress < 1) requestAnimationFrame(frame);
+      else {
+        el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 220, easing: 'cubic-bezier(.2,.9,.25,1)' });
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // === render auction hero
+  function renderAuction(idx){
+    const a = AUCTIONS[idx % AUCTIONS.length];
+    if(!a) return;
+    refs.auctionTitle.textContent = a.title;
+    refs.auctionDesc.textContent = (a.promo ? `PROMO ${a.promo.pct}% • ` : '') + a.desc;
+    // image
+    refs.auctionImage.innerHTML = `<img src="${a.img}" alt="${a.title}">`;
+    refs.auctionStock.textContent = 'Stock: ' + (a.stock || '—');
+    refs.auctionPrice.textContent = fmt(a.currentBid);
+    // small carousel
+    refs.carouselSmall.innerHTML = '';
+    AUCTIONS.slice(0,6).forEach(x=>{
+      const n = document.createElement('div'); n.style.minWidth='110px'; n.style.border='1px solid rgba(0,0,0,0.04)'; n.style.padding='6px'; n.style.borderRadius='8px';
+      n.innerHTML = `<div style="height:56px;overflow:hidden;border-radius:6px;"><img loading="lazy" src="${x.img}" style="width:100%;height:100%;object-fit:cover"></div><div style="font-weight:800;font-size:.85rem;margin-top:.35rem;">${x.title.slice(0,22)}</div><div class="muted small">${fmt(x.currentBid)}</div>`;
+      refs.carouselSmall.appendChild(n);
+    });
+  }
+  renderAuction(currentAuctionIndex);
+
+  // auction rotation
+  setInterval(()=> {
+    currentAuctionIndex = (currentAuctionIndex + 1) % AUCTIONS.length;
+    renderAuction(currentAuctionIndex);
+  }, 6500);
+
+  // auction timer tick
+  setInterval(()=> {
+    const a = AUCTIONS[currentAuctionIndex];
+    if(!a) return;
+    const rem = Math.max(0, a.endsAt - now());
+    refs.auctionTimer.textContent = (() => { const s = Math.floor(rem/1000)%60; const m = Math.floor(rem/60000)%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` })();
+    if(rem <= 0){
+      closeAuction(currentAuctionIndex);
+      renderAuction(currentAuctionIndex);
+    }
+  }, 700);
+
+  // === TICKER & BidVault push helpers
+  function pushTicker(msg){
+    const s = document.createElement('span');
+    s.style.marginRight = '1.4rem'; s.style.display = 'inline-block';
+    s.textContent = msg;
+    refs.bidTicker.insertBefore(s, refs.bidTicker.firstChild);
+    while(refs.bidTicker.children.length > 36) refs.bidTicker.removeChild(refs.bidTicker.lastChild);
+  }
+
+  function pushBidVaultRecord(rec){
+    const node = document.createElement('div');
+    node.className = 'bidvault-item';
+    node.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>${rec.title}</strong><div class="muted small">${new Date(rec.closedAt).toLocaleString()}</div></div><div style="text-align:right;"><div style="font-weight:900">${fmt(rec.finalPrice)}</div><div class="muted small">${rec.bidsCount} bids</div></div></div><div style="margin-top:.5rem;" class="muted small">Top bidders: ${rec.topBidders.slice(0,3).join(', ')}</div>`;
+    refs.bidVaultList.prepend(node);
+
+    // also fill detailed list page
+    const det = document.createElement('div');
+    det.className = 'mb-3';
+    det.innerHTML = `<div style="display:flex;justify-content:space-between;"><div><strong>${rec.title}</strong><div class="muted small">Closed: ${new Date(rec.closedAt).toLocaleString()}</div></div><div style="text-align:right;"><div style="font-weight:900">${fmt(rec.finalPrice)}</div><div class="muted small">${rec.bidsCount} bids</div></div></div><div class="mt-2 muted small">Top: ${rec.topBidders.join(', ')}</div><hr/>`;
+    refs.bidVaultDetailList.prepend(det);
+  }
+
+  // seed BidVault with a few closed entries for demo
+  (function seedVault(){
+    for(let i=0;i<4;i++){
+      const a = AUCTIONS[Math.floor(Math.random()*AUCTIONS.length)];
+      const final = a.currentBid + Math.round(Math.random()*240);
+      const rec = { title: a.title, finalPrice: final, bidsCount: Math.floor(Math.random()*12)+1, closedAt: now() - (1000*60*(20+i)), topBidders: ['alice','bob','charlie'] };
+      BIDVAULT.push(rec);
+      pushBidVaultRecord(rec);
+    }
+  })();
+
+  // Ticker rotation visual movement
+  setInterval(()=> { if(refs.bidTicker.children.length > 2) refs.bidTicker.appendChild(refs.bidTicker.firstChild); }, 2100);
+
+  // === Simulate live activity (auto-bids, promos)
+  function simulateActivity(){
+    const a = AUCTIONS[Math.floor(Math.random()*AUCTIONS.length)];
+    if(!a) return;
+    const r = Math.random();
+    if(r < 0.5){
+      // auto-bid
+      const inc = Math.max(1, Math.round(a.currentBid * (0.02 + Math.random()*0.08)));
+      const prev = a.currentBid;
+      a.currentBid += inc;
+      a.bids.push({ at: now(), amount: a.currentBid, bidder: 'user' + Math.floor(Math.random()*900) });
+      if(AUCTIONS[currentAuctionIndex].auctionId === a.auctionId) animateNum(refs.auctionPrice, prev, a.currentBid);
+      pushTicker(`${a.title} — BID ${fmt(a.currentBid)}`);
+    } else {
+      if(!a.promo && Math.random() < 0.25){ a.promo = { pct: 10 + Math.floor(Math.random()*20), note: 'Seller Promo' }; pushTicker(`${a.title} — PROMO ${a.promo.pct}%`); }
+      else pushTicker(`${a.title} — flash offer`);
+    }
+    TX_DAY += Math.floor(1 + Math.random()*3);
+  }
+  setInterval(simulateActivity, 1700);
+
+  // === Auction close & replacement
+  function closeAuction(idx){
+    const a = AUCTIONS[idx];
+    if(!a) return;
+    const final = a.currentBid;
+    const rec = { title: a.title, finalPrice: final, bidsCount: a.bids.length, closedAt: now(), topBidders: a.bids.slice(-3).reverse().map(b => b.bidder || ('user'+Math.floor(Math.random()*999))) };
+    BIDVAULT.unshift(rec);
+    pushBidVaultRecord(rec);
+    pushTicker(`AUCTION CLOSED: ${a.title} → ${fmt(final)}`);
+    // replace with a new randomized auction
+    const replacement = PRODUCTS[Math.floor(Math.random()*PRODUCTS.length)];
+    const newA = {...replacement, auctionId: 'auc-'+Math.random().toString(36).slice(2,9), currentBid: Math.round(replacement.price*(0.75 + Math.random()*0.3)), bids: [], endsAt: now() + (90 + Math.floor(Math.random()*420)) * 1000 };
+    AUCTIONS[idx] = newA;
+  }
+
+  // === Bid Now UI
+  function openBidModal(auction){
+    const root = $('#modalRoot');
+    root.innerHTML = ''; root.style.pointerEvents = 'auto';
+    const panel = document.createElement('div'); panel.className = 'card-mono p-3'; panel.style.minWidth = '420px';
+    panel.innerHTML = `<div style="display:flex;gap:1rem;"><div style="width:40%"><img src="${auction.img}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></div><div style="flex:1"><div style="display:flex;justify-content:space-between;"><div><strong>${auction.title}</strong><div class="muted small">${auction.desc}</div></div><div class="muted small">${fmt(auction.currentBid)}</div></div><div style="margin-top:.7rem;"><label class="form-label small">Place your bid (USD)</label><input id="bidAmountInput" class="form-control form-control-sm" type="number" min="${auction.currentBid+1}" value="${auction.currentBid + Math.max(1,Math.round(auction.currentBid*0.03))}"></div><div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem;"><button class="btn btn-outline-dark" id="closeBid">Cancel</button><button class="btn btn-dark" id="submitBid">Place Bid</button></div></div></div>`;
+    root.appendChild(panel); root.setAttribute('aria-hidden','false');
+    $('#closeBid').addEventListener('click', ()=> { root.innerHTML=''; root.setAttribute('aria-hidden','true'); root.style.pointerEvents='none'; });
+    $('#submitBid').addEventListener('click', ()=>{
+      const val = Number($('#bidAmountInput').value);
+      if(isNaN(val) || val <= auction.currentBid){ alert('Enter a bid greater than current highest bid.'); return; }
+      const prev = auction.currentBid;
+      auction.currentBid = val;
+      auction.bids.push({ at: now(), amount: val, bidder: 'you' });
+      if(AUCTIONS[currentAuctionIndex].auctionId === auction.auctionId) animateNum(refs.auctionPrice, prev, val);
+      pushTicker(`YOU BID ${fmt(val)} on ${auction.title}`);
+      root.innerHTML=''; root.setAttribute('aria-hidden','true'); root.style.pointerEvents='none';
+      auction.endsAt = Math.max(auction.endsAt + 18*1000, now() + 30*1000);
+    });
+  }
+
+  $('#bidNowBtn').addEventListener('click', ()=> openBidModal(AUCTIONS[currentAuctionIndex]));
+
+  // === Marketplace rendering
+  function renderProductsChunk(){
+    const frag = document.createDocumentFragment();
+    const slice = PRODUCTS.slice(shownProducts, shownProducts + PER_PAGE);
+    slice.forEach(p => {
+      const el = document.createElement('div'); el.className = 'product card-mono';
+      el.innerHTML = `<div class="img"><img loading="lazy" src="${p.img}" alt="${p.title}"></div><div class="body"><div><div class="title">${p.title}</div><div class="meta">${p.cat.toUpperCase()} • ${p.desc}</div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;"><div><div class="price">${fmt(p.price)}</div><div class="muted small">${p.stock} in stock ${p.promo ? ' • ' + p.promo.pct + '% off' : ''}</div></div><div style="display:flex;flex-direction:column;gap:.35rem;"><button class="btn btn-outline-dark btn-sm viewBtn" data-id="${p.uid}"><i class="bi bi-eye"></i></button><button class="btn btn-dark btn-sm buyBtn" data-id="${p.uid}"><i class="bi bi-lock-fill"></i></button></div></div></div>`;
+      frag.appendChild(el);
+    });
+    refs.productGrid.appendChild(frag);
+    shownProducts += slice.length;
+    if(shownProducts >= PRODUCTS.length) refs.loadMoreBtn.disabled = true;
+  }
+  renderProductsChunk();
+  refs.loadMoreBtn.addEventListener('click', renderProductsChunk);
+
+  // product view & quick buy delegation
+  refs.productGrid.addEventListener('click', (e) => {
+    const view = e.target.closest('.viewBtn'); const buy = e.target.closest('.buyBtn');
+    if(view){ openProductModal(view.dataset.id); }
+    if(buy){ quickStageBuy(buy.dataset.id); }
+  });
+
+  function openProductModal(uid){
+    const p = PRODUCTS.find(x => x.uid === uid);
+    if(!p) return;
+    const root = $('#modalRoot'); root.innerHTML=''; root.style.pointerEvents='auto';
+    const panel = document.createElement('div'); panel.className='card-mono p-3'; panel.style.minWidth='420px';
+    panel.innerHTML = `<div style="display:flex;gap:1rem;"><div style="width:44%"><img src="${p.img}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><div><strong>${p.title}</strong><div class="muted small">${p.cat.toUpperCase()}</div></div><div class="muted small">${fmt(p.price)}</div></div><p class="muted small" style="margin-top:.6rem">${p.desc} ${p.promo ? '• Promo ' + p.promo.pct + '% Off' : ''}</p><div style="display:flex;gap:.6rem;margin-top:1rem;"><button class="btn btn-dark" id="modalAddVault">Add to Vault</button><button class="btn btn-outline-dark" id="modalClose">Close</button></div></div></div>`;
+    root.appendChild(panel); root.setAttribute('aria-hidden','false');
+    $('#modalClose').addEventListener('click', ()=> { root.innerHTML=''; root.setAttribute('aria-hidden','true'); root.style.pointerEvents='none'; });
+    $('#modalAddVault').addEventListener('click', ()=> { root.innerHTML=''; root.setAttribute('aria-hidden','true'); root.style.pointerEvents='none'; quickStageBuy(uid); });
+  }
+
+  // === Quick Vault deposit flow
+  function quickStageBuy(uid){
+    const p = PRODUCTS.find(x => x.uid === uid);
+    if(!p) return;
+    staged = { uid: p.uid, title: p.title, amount: p.price };
+    refs.vaultAmount.value = p.price;
+    refs.vaultStatusLine.textContent = `Ready to deposit ${fmt(p.price)} for ${p.title}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  refs.depositBtn.addEventListener('click', ()=> {
+    if(!staged){ alert('Select a product first (Add to Vault)'); return; }
+    refs.depositBtn.disabled = true; refs.depositBtn.textContent = 'Processing...';
+    setTimeout(()=> {
+      const ord = { id:'ord-'+Math.random().toString(36).slice(2,9), title: staged.title, amount: staged.amount, status:'pending', createdAt: now() };
+      ORDERS.push(ord);
+      refs.vaultStatusLine.textContent = `Vault holding ${fmt(staged.amount)}`;
+      refs.depositBtn.textContent = 'Deposited'; refs.depositBtn.disabled = false; refs.cancelDepositBtn.disabled = false;
+      staged = null;
+      setTimeout(()=> progressOrder(ord.id), 1400);
+    }, 900);
+  });
+
+  refs.cancelDepositBtn.addEventListener('click', ()=> {
+    const last = ORDERS[ORDERS.length - 1];
+    if(!last || last.status !== 'pending'){ alert('No cancellable order'); return; }
+    last.status = 'cancelled'; refs.vaultStatusLine.textContent = 'No active deposit'; refs.cancelDepositBtn.disabled = true;
+  });
+
+  function progressOrder(id){
+    const o = ORDERS.find(x => x.id === id);
+    if(!o) return;
+    o.status = 'in_transit';
+    setTimeout(()=> { o.status = 'delivered'; setTimeout(()=> { o.status = 'released'; refs.vaultStatusLine.textContent = 'Funds released'; }, 2600); }, 2000);
+  }
+
+  // === Search & sort marketplace
+  refs.marketSearch.addEventListener('input', (e)=> {
+    const q = e.target.value.toLowerCase().trim();
+    if(!q){ refs.productGrid.innerHTML=''; shownProducts=0; renderProductsChunk(); return; }
+    const list = PRODUCTS.filter(p => (p.title + ' ' + p.desc).toLowerCase().includes(q)).slice(0,48);
+    refs.productGrid.innerHTML='';
+    list.forEach(p => {
+      const el = document.createElement('div'); el.className='product card-mono';
+      el.innerHTML = `<div class="img"><img loading="lazy" src="${p.img}" alt="${p.title}"></div><div class="body"><div><div class="title">${p.title}</div><div class="meta">${p.cat.toUpperCase()}</div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;"><div><div class="price">${fmt(p.price)}</div><div class="muted small">${p.stock} in stock</div></div><div style="display:flex;flex-direction:column;gap:.35rem;"><button class="btn btn-outline-dark btn-sm viewBtn" data-id="${p.uid}">View</button><button class="btn btn-dark btn-sm buyBtn" data-id="${p.uid}">Buy</button></div></div></div>`;
+      refs.productGrid.appendChild(el);
+    });
+  });
+
+  refs.marketSort.addEventListener('change', (e)=> {
+    const v = e.target.value; let set = PRODUCTS.slice();
+    if(v === 'price_low') set.sort((a,b)=>a.price-b.price);
+    if(v === 'price_high') set.sort((a,b)=>b.price-a.price);
+    if(v === 'new') set.sort((a,b)=>b.uid.localeCompare(a.uid));
+    refs.productGrid.innerHTML=''; set.slice(0,48).forEach(p => {
+      const el = document.createElement('div'); el.className='product card-mono';
+      el.innerHTML = `<div class="img"><img loading="lazy" src="${p.img}" alt="${p.title}"></div><div class="body"><div><div class="title">${p.title}</div><div class="meta">${p.cat.toUpperCase()}</div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;"><div><div class="price">${fmt(p.price)}</div><div class="muted small">${p.stock} in stock</div></div><div style="display:flex;flex-direction:column;gap:.35rem;"><button class="btn btn-outline-dark btn-sm viewBtn" data-id="${p.uid}">View</button><button class="btn btn-dark btn-sm buyBtn" data-id="${p.uid}">Buy</button></div></div></div>`;
+      refs.productGrid.appendChild(el);
+    });
+  });
+
+  // === Trending & preview
+  function renderTrending(){
+    refs.trendingStrip.innerHTML = '';
+    for(let i=0;i<8;i++){
+      const p = PRODUCTS[Math.floor(Math.random()*PRODUCTS.length)];
+      const n = document.createElement('div'); n.style.minWidth='220px'; n.style.border='1px solid rgba(0,0,0,0.04)'; n.style.padding='8px'; n.style.borderRadius='10px';
+      n.innerHTML = `<div style="height:120px;overflow:hidden;border-radius:8px;"><img loading="lazy" src="${p.img}" style="width:100%;height:100%;object-fit:cover"></div><div style="font-weight:800;margin-top:.45rem;">${p.title.slice(0,28)}</div><div class="muted small">${fmt(p.price)}</div>`;
+      refs.trendingStrip.appendChild(n);
+    }
+  }
+  renderTrending();
+
+  function renderPreview(){
+    refs.previewGrid.innerHTML = '';
+    for(let i=0;i<6;i++){
+      const p = PRODUCTS[i];
+      const el = document.createElement('div'); el.style.border='1px solid rgba(0,0,0,0.04)'; el.style.padding='6px'; el.style.borderRadius='10px';
+      el.innerHTML = `<div style="height:110px;overflow:hidden;border-radius:6px;"><img loading="lazy" src="${p.img}" style="width:100%;height:100%;object-fit:cover"></div><div style="font-weight:800;margin-top:.4rem;">${p.title}</div><div class="muted small">${fmt(p.price)}</div>`;
+      refs.previewGrid.appendChild(el);
+    }
+  }
+  renderPreview();
+
+  // === Profile view (active bids)
+  function renderProfileActive(){
+    refs.profileActiveBids.innerHTML = '';
+    // active bids are auctions with any bids from 'you'
+    const myBids = AUCTIONS.filter(a => a.bids.some(b => b.bidder === 'you'));
+    if(!myBids.length){ refs.profileActiveBids.innerHTML = '<div class="muted">No active bids (demo)</div>'; return; }
+    myBids.forEach(a => {
+      const el = document.createElement('div'); el.className='card-mono p-2 mb-2';
+      el.innerHTML = `<div style="display:flex;justify-content:space-between;"><div><strong>${a.title}</strong><div class="muted small">Highest: ${fmt(a.currentBid)}</div></div><div style="text-align:right"><div class="muted small">Ends: ${new Date(a.endsAt).toLocaleString()}</div></div></div>`;
+      refs.profileActiveBids.appendChild(el);
+    });
+  }
+
+  // update simple stats maybe in future
+
+  // === keyboard accessibility: escape closes modals
+  document.addEventListener('keydown', (e)=> {
+    if(e.key === 'Escape'){ const root = $('#modalRoot'); root.innerHTML=''; root.setAttribute('aria-hidden','true'); root.style.pointerEvents='none'; }
+  });
+
+  // === auto-simulate small activity periodically (increase TX count demo)
+  setInterval(()=> { TX_DAY += Math.floor(Math.random()*3); }, 5000);
+
+  // initial UI seeds
+  AUCTIONS.slice(0,8).forEach(a => pushTicker(`${a.title} • starting ${fmt(a.currentBid)} • ${Math.max(1, Math.floor(Math.random()*10))}pcs`));
+
+  // done
+  console.info('Tukopax Ninja demo loaded — enjoy the bid theater.');
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,1576 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tukopax — Vault Auth Experience</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    /*
+      Tukopax Vault Auth — Black & White only theme.
+      The CSS uses CSS variables so theme toggling is surgical and consistent across elements.
+    */
+
+    :root{
+      /* Core palette - strictly black & white */
+      --bg: #ffffff;
+      --panel-bg: rgba(0,0,0,0.04);
+      --text: #000000;
+      --muted: rgba(0,0,0,0.55);
+      --border: rgba(0,0,0,0.14);
+      --glass: rgba(255,255,255,0.6);
+      --glass-2: rgba(0,0,0,0.04);
+
+      /* Accent only used for micro glow lines; still monochrome via opacity */
+      --elev: rgba(0,0,0,0.06);
+
+      --radius: 14px;
+      --radius-sm: 8px;
+      --duration: 360ms;
+    }
+
+    /* Dark mode variables (still black & white) */
+    .dark-theme {
+      --bg: #000000;
+      --panel-bg: rgba(255,255,255,0.06);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.75);
+      --border: rgba(255,255,255,0.18);
+      --glass: rgba(0,0,0,0.6);
+      --glass-2: rgba(255,255,255,0.03);
+      --elev: rgba(255,255,255,0.06);
+    }
+
+    /* Reset & base */
+    html,body{
+      height:100%;
+      margin:0;
+    }
+    body{
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      transition: background var(--duration) ease, color var(--duration) ease;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:2.25rem;
+      overflow-y:auto;
+      perspective: 1600px; /* for page flip */
+    }
+
+    /* Page container for flip animation */
+    .vault-wrap {
+      width: 100%;
+      max-width:1100px;
+      display:grid;
+      grid-template-columns: 480px 1fr;
+      gap:2rem;
+      transform-style:preserve-3d;
+      transition: transform 700ms cubic-bezier(.2,.9,.3,1);
+    }
+
+    /* Flip effect (subtle) — toggles when .flip applied to body */
+    body.flip .vault-wrap {
+      transform: rotateY(12deg);
+    }
+
+    /* Left panel: branding / narrative */
+    .panel-brand {
+      background: linear-gradient(180deg, var(--panel-bg), var(--glass-2));
+      border-radius: var(--radius);
+      padding:2.25rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px var(--elev);
+      display:flex;
+      flex-direction:column;
+      gap:1.5rem;
+      align-items:flex-start;
+      justify-content:center;
+      min-height:520px;
+    }
+
+    .brand-top {
+      display:flex;
+      gap:1rem;
+      align-items:center;
+      width:100%;
+      justify-content:space-between;
+    }
+    .brand {
+      display:flex;
+      gap:0.75rem;
+      align-items:center;
+    }
+    .brand .logo {
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(180deg, var(--bg), var(--panel-bg));
+      border: 2px solid var(--border);
+      font-weight:800;
+      font-size:18px;
+      color: var(--text);
+      user-select:none;
+    }
+    .brand h3{
+      margin:0;
+      font-size:1.15rem;
+      letter-spacing:0.02em;
+    }
+    .brand p { margin:0; color:var(--muted); font-size:0.9rem }
+
+    /* Tagline / story */
+    .brand-story {
+      margin-top:.5rem;
+      font-weight:700;
+      font-size:1.1rem;
+      letter-spacing:0.02em;
+    }
+    .brand-story .sub { color:var(--muted); font-weight:500; font-size:0.95rem; margin-top:.35rem; }
+
+    /* Hero vault visual */
+    .vault-visual {
+      flex:1;
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-top:.5rem;
+    }
+    .vault-frame {
+      width:100%;
+      height:220px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:1rem;
+      background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(255,255,255,0.01));
+    }
+    .vault-door {
+      width:160px;
+      height:160px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border: 2px solid var(--border);
+      background: linear-gradient(180deg, var(--bg), var(--panel-bg));
+      box-shadow: 0 8px 20px var(--elev);
+      font-weight:800;
+      letter-spacing:0.03em;
+      font-size:14px;
+      text-align:center;
+      color:var(--text);
+      transition: transform 450ms ease, box-shadow 300ms ease;
+    }
+    .vault-door:hover { transform: translateY(-6px) scale(1.02); box-shadow:0 18px 40px var(--elev); cursor:default; }
+
+    /* Right panel: auth forms */
+    .panel-auth {
+      background: linear-gradient(180deg, var(--panel-bg), transparent);
+      border-radius: var(--radius);
+      padding:1.75rem;
+      border:1px solid var(--border);
+      box-shadow: 0 10px 30px var(--elev);
+      min-height:520px;
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+    }
+
+    .auth-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+    }
+    .auth-title { font-size:1.25rem; font-weight:800; margin:0; }
+    .auth-sub { color:var(--muted); font-size:0.95rem; margin:0; }
+
+    /* Tabs */
+    .auth-tabs { margin-top:.5rem; }
+    .nav-auth .nav-link {
+      border-radius:10px;
+      color:var(--text);
+      font-weight:700;
+      border:1px solid transparent;
+      transition: background var(--duration) ease, border var(--duration) ease;
+    }
+    .nav-auth .nav-link.active {
+      background: linear-gradient(180deg, var(--bg), var(--panel-bg));
+      border-color: var(--border);
+      box-shadow: 0 6px 18px var(--elev);
+    }
+
+    /* form layout */
+    .auth-body {
+      margin-top:.4rem;
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+      flex:1;
+    }
+
+    .form-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border-radius: 12px;
+      padding:1rem;
+      border:1px solid var(--border);
+    }
+
+    /* Inputs */
+    .form-control, .form-select {
+      background: transparent;
+      border-radius: 10px;
+      border: 1.6px solid var(--border);
+      color: var(--text);
+      padding:.85rem .9rem;
+      transition: border-color var(--duration) ease, box-shadow var(--duration) ease;
+    }
+    .form-control::placeholder { color: var(--muted); opacity:.9; }
+    .form-control:focus {
+      outline:none;
+      box-shadow: 0 6px 20px var(--elev);
+      border-color: var(--border);
+    }
+    .form-label { font-weight:700; color:var(--text); }
+
+    /* Password strength */
+    .pw-meter {
+      height:8px;
+      background:transparent;
+      border-radius:8px;
+      overflow:hidden;
+      border:1px solid var(--border);
+    }
+    .pw-meter > span {
+      display:block; height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(0,0,0,0.15), rgba(0,0,0,0.25));
+      transition: width 300ms ease;
+    }
+
+    /* Social buttons (B&W) */
+    .social-row { display:flex; gap:.6rem; }
+    .social-btn {
+      flex:1;
+      display:flex;
+      gap:.5rem;
+      align-items:center;
+      justify-content:center;
+      border-radius:10px;
+      padding:.65rem;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, var(--bg), transparent);
+      color:var(--text);
+      font-weight:700;
+      transition: transform 180ms ease, box-shadow 200ms ease;
+    }
+    .social-btn:hover { transform: translateY(-3px); box-shadow:0 8px 20px var(--elev); text-decoration:none; }
+
+    /* OTP inputs */
+    .otp-row { display:flex; gap:.6rem; }
+    .otp-box {
+      width:64px; height:64px;
+      display:flex; align-items:center; justify-content:center;
+      border-radius:8px;
+      border:1.6px solid var(--border);
+      font-size:1.25rem;
+      font-weight:800;
+      background:transparent;
+      color:var(--text);
+    }
+
+    /* Verification notice */
+    .verification-note {
+      font-size:0.92rem;
+      color:var(--muted);
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.02));
+      padding:.6rem;
+      border-radius:8px;
+      border:1px dashed var(--border);
+    }
+
+    /* CTA */
+    .btn-primary-tuk {
+      background: var(--text);
+      color: var(--bg);
+      font-weight:800;
+      padding:.8rem 1.1rem;
+      border-radius:12px;
+      border:2px solid var(--border);
+      transition: transform 220ms ease, box-shadow 200ms ease, background var(--duration) ease, color var(--duration) ease;
+    }
+    .btn-primary-tuk:hover { transform: translateY(-3px); box-shadow:0 10px 30px var(--elev); text-decoration:none; }
+
+    /* micro links */
+    .muted-link { color:var(--muted); font-weight:700; cursor:pointer; text-decoration:underline; text-underline-offset:4px; }
+
+    /* subtle footer */
+    .auth-footer { text-align:center; font-size:0.9rem; color:var(--muted); margin-top:8px; }
+
+    /* tiny responsiveness */
+    @media (max-width: 980px) {
+      .vault-wrap { grid-template-columns:1fr; max-width:900px; }
+      .panel-brand { order:2; }
+      .panel-auth { order:1; }
+    }
+
+    /* small helpers for hidden states */
+    .hidden { display:none !important; }
+
+    /* decorative thin dividing line */
+    .thin-line { height:1px; background:var(--border); width:100%; border-radius:2px; margin: .6rem 0; }
+/* Country selector styles */
+.country-selector {
+    position: relative;
+}
+
+.country-selector .selected-country {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 0.9rem;
+    background: transparent;
+    border-radius: 10px;
+    border: 1.6px solid var(--border);
+    transition: border-color var(--duration) ease, box-shadow var(--duration) ease;
+}
+
+.country-selector .selected-country:focus {
+    outline: none;
+    box-shadow: 0 6px 20px var(--elev);
+    border-color: var(--border);
+}
+
+.country-selector .dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.country-selector .dropdown-menu-inner {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.country-selector .dropdown-item {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.country-selector .dropdown-item:hover {
+    background: var(--panel-bg);
+}
+
+.country-selector .search-country {
+    border-radius: 8px;
+    padding: 0.5rem;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+.country-selector .flag {
+    font-size: 1.2rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+.country-selector .country-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.country-selector .country-code {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-left: 0.5rem;
+}
+/* Password toggle button styling */
+#togglePassword {
+  background: transparent;
+  border: 1.6px solid var(--border);
+  border-left: none !important;
+  color: var(--muted);
+  transition: all var(--duration) ease;
+}
+
+#togglePassword:hover {
+  background: var(--panel-bg);
+  color: var(--text);
+}
+
+.input-group .form-control:focus + #togglePassword {
+  border-color: var(--border);
+  box-shadow: none;
+}
+  </style>
+</head>
+<body class="">
+
+  <!-- Vault container (two panels) -->
+  <div class="vault-wrap" id="vaultWrap" role="application" aria-labelledby="authTitle">
+
+    <!-- LEFT: Branding / Story -->
+    <aside class="panel-brand" aria-hidden="false">
+      <div class="brand-top" >
+        <div class="brand">
+          <div class="logo" aria-hidden="true">TK</div>
+          <div>
+            <h3>Tukopax</h3>
+            <p class="muted">A trust layer for e-commerce</p>
+          </div>
+        </div>
+
+        <!-- theme control (also present as button inside auth) -->
+        <div>
+          <button id="themeBtnHeader" class="btn btn-sm" aria-label="Toggle theme" title="Toggle theme" style="border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--text);">
+            <i class="bi bi-moon-stars-fill"></i>
+            <span class="ms-2" style="font-weight:700;">Theme</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="brand-story">
+        Enter the Tukopax Vault — where <strong>trust</strong> meets <strong>transaction</strong>.
+        <div class="sub">For buyers: locked, refundable funds. For sellers: ready buyers and secure payout lanes. Fast, safe, auditable.</div>
+      </div>
+
+      <div class="vault-visual" aria-hidden="true">
+        <div class="vault-frame" role="img" aria-label="Vault door">
+          <div class="vault-door">T U K O P A X<br><small style="font-weight:600;opacity:.6">Trust Layer</small></div>
+        </div>
+      </div>
+
+      <div class="thin-line" aria-hidden="true"></div>
+
+      <div>
+        <h5 style="margin:0;font-weight:800">Why Tukopax?</h5>
+        <ul style="margin-top:.6rem; padding-left:1.1rem; color:var(--muted)">
+          <li>Non-custodial escrow — funds locked until fulfillment</li>
+          <li>AI matching for serious buyers & sellers</li>
+          <li>Refundable & auditable flows</li>
+        </ul>
+      </div>
+
+      <div style="width:100%; margin-top:.6rem;">
+        <a class="muted-link" id="learnMore" role="button">Learn how Tukopax protects funds →</a>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Authentication -->
+    <main class="panel-auth" id="auth" aria-live="polite">
+      <div class="auth-header">
+        <div>
+          <h2 class="auth-title" id="authTitle">Welcome — Secure Sign In</h2>
+          <div class="auth-sub" id="authSub">Sign in or create an account to access your Tukopax vault</div>
+        </div>
+
+        <div style="display:flex;gap:.5rem;">
+          <button class="btn btn-outline-secondary btn-sm" id="openVerification" title="Account verification">Verify</button>
+          <button class="btn btn-outline-secondary btn-sm" id="helpBtn" title="Help">Help</button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <ul class="nav nav-pills nav-auth mt-2" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tab-login" data-tab="login" role="tab" aria-selected="true">Login</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-signup" data-tab="signup" role="tab" aria-selected="false">Sign Up</button>
+        </li>
+        <li class="nav-item ms-auto" role="presentation">
+          <button class="nav-link" id="tab-verify" data-tab="verify" role="tab" aria-selected="false" disabled>Verify</button>
+        </li>
+      </ul>
+
+      <div class="auth-body">
+
+        <!-- LOGIN PANEL -->
+        <section id="panel-login" class="form-card" role="region" aria-labelledby="loginTitle">
+          <h3 id="loginTitle" style="margin:0 0 .6rem 0">Sign in to Tukopax</h3>
+
+          <div class="row g-2 mb-2">
+            <div class="col-12 col-md-6">
+              <a href="/auth/google" class="social-btn" id="btnGoogle" role="button" aria-label="Sign in with Google">
+                <i class="bi bi-google" style="font-size:1.05rem"></i>
+                <span>Google</span>
+              </a>
+            </div>
+            <div class="col-12 col-md-6">
+              <div style="display:flex;gap:.6rem;">
+                <a href="/auth/facebook" class="social-btn" id="btnFacebook" role="button" aria-label="Sign in with Facebook">
+                  <i class="bi bi-facebook"></i> Facebook
+                </a>
+                <a href="/auth/x" class="social-btn" id="btnX" role="button" aria-label="Sign in with X">
+                  <i class="bi bi-x-lg"></i> X
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="thin-line"></div>
+
+          <form id="loginForm" novalidate>
+            <div class="mb-2">
+              <label class="form-label">Email</label>
+              <input type="email" id="loginEmail" class="form-control" placeholder="you@domain.com" required>
+            </div>
+            <!-- In the login form section, replace the password input with this: -->
+<div class="mb-2 position-relative">
+  <label class="form-label">Password</label>
+  <div class="input-group">
+    <input type="password" id="loginPassword" class="form-control" placeholder="Your password" required>
+    <button type="button" class="btn btn-outline-secondary" id="togglePassword" aria-label="Show password" style="border-radius: 0 10px 10px 0; border-left: none;">
+      <i class="bi bi-eye"></i>
+    </button>
+  </div>
+</div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="persistLogin">
+                <label class="form-check-label" for="persistLogin">Keep me signed in</label>
+              </div>
+              <a class="muted-link" id="forgotPasswordBtn">Forgot?</a>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary-tuk" id="loginSubmit">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+              </button>
+            </div>
+          </form>
+
+        </section>
+
+        <!-- SIGNUP PANEL -->
+        <section id="panel-signup" class="form-card hidden" role="region" aria-labelledby="signupTitle">
+          <h3 id="signupTitle" style="margin:0 0 .6rem 0">Create Tukopax Account</h3>
+
+          <div class="mb-2">
+            <label class="form-label">Full name</label>
+            <input type="text" id="signupName" class="form-control" placeholder="Your full name" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Email</label>
+            <input type="email" id="signupEmail" class="form-control" placeholder="you@domain.com" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Password</label>
+            <input type="password" id="signupPassword" class="form-control" placeholder="Choose a strong password" required>
+            <div class="mt-2 pw-meter" aria-hidden="true"><span id="pwFill"></span></div>
+            <small id="pwHint" class="text-muted">Use at least 8 characters, numbers and letters.</small>
+          </div>
+
+          <div class="mb-2">
+    <label class="form-label">Country</label>
+    <div class="country-selector">
+        <div class="selected-country form-control d-flex align-items-center" data-bs-toggle="dropdown">
+            <span class="flag me-2">🇺🇸</span>
+            <span class="country-name flex-grow-1">United States</span>
+            <span class="country-code">+1</span>
+        </div>
+        <div class="dropdown-menu w-100 p-0">
+            <div class="px-2 py-1">
+                <input type="text" class="form-control search-country mb-1" placeholder="Search country...">
+            </div>
+            <div class="dropdown-menu-inner">
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="United States" data-code="+1" data-flag="🇺🇸">
+                    <span class="flag me-2">🇺🇸</span>
+                    <span class="country-name flex-grow-1">United States</span>
+                    <span class="country-code">+1</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="United Kingdom" data-code="+44" data-flag="🇬🇧">
+                    <span class="flag me-2">🇬🇧</span>
+                    <span class="country-name flex-grow-1">United Kingdom</span>
+                    <span class="country-code">+44</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Canada" data-code="+1" data-flag="🇨🇦">
+                    <span class="flag me-2">🇨🇦</span>
+                    <span class="country-name flex-grow-1">Canada</span>
+                    <span class="country-code">+1</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Kenya" data-code="+254" data-flag="🇰🇪">
+                    <span class="flag me-2">🇰🇪</span>
+                    <span class="country-name flex-grow-1">Kenya</span>
+                    <span class="country-code">+254</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Germany" data-code="+49" data-flag="🇩🇪">
+                    <span class="flag me-2">🇩🇪</span>
+                    <span class="country-name flex-grow-1">Germany</span>
+                    <span class="country-code">+49</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="France" data-code="+33" data-flag="🇫🇷">
+                    <span class="flag me-2">🇫🇷</span>
+                    <span class="country-name flex-grow-1">France</span>
+                    <span class="country-code">+33</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Australia" data-code="+61" data-flag="🇦🇺">
+                    <span class="flag me-2">🇦🇺</span>
+                    <span class="country-name flex-grow-1">Australia</span>
+                    <span class="country-code">+61</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Brazil" data-code="+55" data-flag="🇧🇷">
+                    <span class="flag me-2">🇧🇷</span>
+                    <span class="country-name flex-grow-1">Brazil</span>
+                    <span class="country-code">+55</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="China" data-code="+86" data-flag="🇨🇳">
+                    <span class="flag me-2">🇨🇳</span>
+                    <span class="country-name flex-grow-1">China</span>
+                    <span class="country-code">+86</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="India" data-code="+91" data-flag="🇮🇳">
+                    <span class="flag me-2">🇮🇳</span>
+                    <span class="country-name flex-grow-1">India</span>
+                    <span class="country-code">+91</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Japan" data-code="+81" data-flag="🇯🇵">
+                    <span class="flag me-2">🇯🇵</span>
+                    <span class="country-name flex-grow-1">Japan</span>
+                    <span class="country-code">+81</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Mexico" data-code="+52" data-flag="🇲🇽">
+                    <span class="flag me-2">🇲🇽</span>
+                    <span class="country-name flex-grow-1">Mexico</span>
+                    <span class="country-code">+52</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Nigeria" data-code="+234" data-flag="🇳🇬">
+                    <span class="flag me-2">🇳🇬</span>
+                    <span class="country-name flex-grow-1">Nigeria</span>
+                    <span class="country-code">+234</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="South Africa" data-code="+27" data-flag="🇿🇦">
+                    <span class="flag me-2">🇿🇦</span>
+                    <span class="country-name flex-grow-1">South Africa</span>
+                    <span class="country-code">+27</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Spain" data-code="+34" data-flag="🇪🇸">
+                    <span class="flag me-2">🇪🇸</span>
+                    <span class="country-name flex-grow-1">Spain</span>
+                    <span class="country-code">+34</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Turkey" data-code="+90" data-flag="🇹🇷">
+                    <span class="flag me-2">🇹🇷</span>
+                    <span class="country-name flex-grow-1">Turkey</span>
+                    <span class="country-code">+90</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="United Arab Emirates" data-code="+971" data-flag="🇦🇪">
+                    <span class="flag me-2">🇦🇪</span>
+                    <span class="country-name flex-grow-1">United Arab Emirates</span>
+                    <span class="country-code">+971</span>
+                </a>
+                <a class="dropdown-item d-flex align-items-center" href="#" data-name="Saudi Arabia" data-code="+966" data-flag="🇸🇦">
+                    <span class="flag me-2">🇸🇦</span>
+                    <span class="country-name flex-grow-1">Saudi Arabia</span>
+                    <span class="country-code">+966</span>
+                </a>
+            </div>
+        </div>
+        <select id="signupCountry" class="form-select" hidden>
+            <option value="United States" selected>United States</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Canada">Canada</option>
+            <option value="Kenya">Kenya</option>
+            <option value="Germany">Germany</option>
+            <option value="France">France</option>
+            <option value="Australia">Australia</option>
+            <option value="Brazil">Brazil</option>
+            <option value="China">China</option>
+            <option value="India">India</option>
+            <option value="Japan">Japan</option>
+            <option value="Mexico">Mexico</option>
+            <option value="Nigeria">Nigeria</option>
+            <option value="South Africa">South Africa</option>
+            <option value="Spain">Spain</option>
+            <option value="Turkey">Turkey</option>
+            <option value="United Arab Emirates">United Arab Emirates</option>
+            <option value="Saudi Arabia">Saudi Arabia</option>
+        </select>
+    </div>
+</div>
+
+          <div class="d-grid gap-2 mt-2">
+            <button id="signupSubmit" class="btn btn-primary-tuk">Create Account</button>
+            <div class="d-flex gap-2">
+              <button id="signupSocialGoogle" class="social-btn"> <i class="bi bi-google"></i> Google</button>
+              <button id="signupSocialInsta" class="social-btn"> <i class="bi bi-instagram"></i> Instagram</button>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- VERIFY PANEL (OTP / 2FA) -->
+        <section id="panel-verify" class="form-card hidden" role="region" aria-labelledby="verifyTitle">
+          <h3 id="verifyTitle" style="margin:0 0 .6rem 0">Verification</h3>
+
+          <p id="verifyPrompt" class="auth-sub">Enter the 6-digit code sent to your email. (Simulated)</p>
+
+          <div class="d-flex align-items-center mb-2">
+            <div class="otp-row" id="otpRow" aria-hidden="false">
+              <input inputmode="numeric" maxlength="1" class="otp-box" id="otp-1" />
+              <input inputmode="numeric" maxlength="1" class="otp-box" id="otp-2" />
+              <input inputmode="numeric" maxlength="1" class="otp-box" id="otp-3" />
+              <input inputmode="numeric" maxlength="1" class="otp-box" id="otp-4" />
+              <input inputmode="numeric" maxlength="1" class="otp-box" id="otp-5" />
+              <input inputmode="numeric" maxlength="1" class="otp-box" id="otp-6" />
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted" id="otpTimer">Resend in 00:30</small>
+            <a class="muted-link hidden" id="resendOtp">Resend</a>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button id="verifySubmit" class="btn btn-primary-tuk">Verify & Continue</button>
+          </div>
+
+        </section>
+
+        <!-- 2FA / EXTRA STEP PANEL -->
+        <section id="panel-2fa" class="form-card hidden" role="region" aria-labelledby="twofaTitle">
+          <h3 id="twofaTitle" style="margin:0 0 .6rem 0">Two-Factor Authentication</h3>
+          <p class="auth-sub">For stronger protection we require one more step. Use the code from your authenticator app or choose SMS.</p>
+
+          <div class="mb-2">
+            <label class="form-label">Method</label>
+            <select id="twofaMethod" class="form-select">
+              <option value="auth">Authenticator App (TOTP)</option>
+              <option value="sms">SMS (phone)</option>
+            </select>
+          </div>
+
+          <div id="twofaApp" class="mb-2">
+            <label class="form-label">Authenticator Code</label>
+            <input type="text" id="twofaCode" class="form-control" placeholder="123456" inputmode="numeric" maxlength="6">
+          </div>
+
+          <div class="d-grid gap-2 mt-2">
+            <button id="twofaSubmit" class="btn btn-primary-tuk">Confirm</button>
+            <button id="twofaSkip" class="btn btn-outline-secondary">Skip (Limited Access)</button>
+          </div>
+
+        </section>
+
+        <!-- VERIFICATION PANEL (replaces KYC) -->
+        <section id="panel-verification" class="form-card hidden" role="region" aria-labelledby="verificationTitle">
+          <h3 id="verificationTitle" style="margin:0 0 .6rem 0">Account Verification</h3>
+          <p class="auth-sub">Verify your email and phone number to unlock full account features.</p>
+
+          <div class="verification-note mb-2">
+            <strong>Limited access if skipped:</strong>  Enjoy the show and   join us when you ready.
+          </div>
+
+          <!-- Email Verification -->
+          <div class="mb-3">
+            <label class="form-label">Email Verification</label>
+            <div class="d-flex gap-2 align-items-center">
+              <input type="email" id="verificationEmail" class="form-control" placeholder="your@email.com" disabled>
+              <button id="verifyEmailBtn" class="btn btn-outline-secondary" style="white-space:nowrap">Send Code</button>
+            </div>
+            <div id="emailCodeGroup" class="mt-2 hidden">
+              <div class="d-flex gap-2 align-items-center">
+                <input type="text" id="emailVerificationCode" class="form-control" placeholder="Enter 6-digit code" inputmode="numeric" maxlength="6">
+                <button id="submitEmailCode" class="btn btn-primary-tuk">Verify</button>
+              </div>
+              <small class="text-muted">Check your email for the verification code</small>
+            </div>
+          </div>
+
+          <!-- Phone Verification -->
+          <div class="mb-3">
+            <label class="form-label">Phone Verification</label>
+            <div class="d-flex gap-2 align-items-center">
+              <input type="tel" id="verificationPhone" class="form-control" placeholder="+254 700 000000">
+              <button id="verifyPhoneBtn" class="btn btn-outline-secondary" style="white-space:nowrap">Send SMS</button>
+            </div>
+            <div id="phoneCodeGroup" class="mt-2 hidden">
+              <div class="d-flex gap-2 align-items-center">
+                <input type="text" id="phoneVerificationCode" class="form-control" placeholder="Enter 6-digit code" inputmode="numeric" maxlength="6">
+                <button id="submitPhoneCode" class="btn btn-primary-tuk">Verify</button>
+              </div>
+              <small class="text-muted">We sent a code via SMS</small>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button id="verificationComplete" class="btn btn-primary-tuk" disabled>Complete Verification</button>
+            <button id="verificationSkip" class="btn btn-outline-secondary" href="dashboard.html">Skip for now</button>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="auth-footer">
+        By continuing you agree to Tukopax Terms and Privacy. — Need help? <span class="muted-link" id="contactSupport">Contact support</span>
+      </div>
+    </main>
+  </div>
+
+  <!-- Small success toast area -->
+  <div id="authToast" style="position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:1200;display:none;">
+    <div class="card p-3" style="border-radius:10px;border:1px solid var(--border);background:var(--panel-bg);">
+      <strong id="authToastMsg">Success</strong>
+    </div>
+  </div>
+
+  <!-- JS: logic for flows -->
+  <script>
+    /******************************************************************
+     * Tukopax Vault Auth — Frontend flow simulation
+     *
+     * Notes:
+     * - This file focuses on UX and flow. Replace `fakeApi.*` with real API calls.
+     * - Do not rely on client-only checks for production security.
+     ******************************************************************/
+
+    // Elements
+    const body = document.body;
+    const themeBtnHeader = document.getElementById('themeBtnHeader');
+    const vaultWrap = document.getElementById('vaultWrap');
+
+    // Tabs and panels
+    const tabLogin = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
+    const tabVerify = document.getElementById('tab-verify');
+    const panelLogin = document.getElementById('panel-login');
+    const panelSignup = document.getElementById('panel-signup');
+    const panelVerify = document.getElementById('panel-verify');
+    const panel2FA = document.getElementById('panel-2fa');
+    const panelVerification = document.getElementById('panel-verification');
+
+    // Forms & controls
+    const loginForm = document.getElementById('loginForm');
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+
+    const signupName = document.getElementById('signupName');
+    const signupEmail = document.getElementById('signupEmail');
+    const signupPassword = document.getElementById('signupPassword');
+    const signupCountry = document.getElementById('signupCountry');
+    const pwFill = document.getElementById('pwFill');
+
+    const otpInputs = Array.from(document.querySelectorAll('#otpRow .otp-box'));
+    const otpTimer = document.getElementById('otpTimer');
+    const resendOtp = document.getElementById('resendOtp');
+
+    const verifySubmit = document.getElementById('verifySubmit');
+
+    const twofaMethod = document.getElementById('twofaMethod');
+    const twofaCode = document.getElementById('twofaCode');
+    const twofaSubmit = document.getElementById('twofaSubmit');
+    const twofaSkip = document.getElementById('twofaSkip');
+
+    const authToast = document.getElementById('authToast');
+    const authToastMsg = document.getElementById('authToastMsg');
+
+    // Verification elements
+    const verifyEmailBtn = document.getElementById('verifyEmailBtn');
+    const verifyPhoneBtn = document.getElementById('verifyPhoneBtn');
+    const submitEmailCode = document.getElementById('submitEmailCode');
+    const submitPhoneCode = document.getElementById('submitPhoneCode');
+    const verificationComplete = document.getElementById('verificationComplete');
+    const verificationSkip = document.getElementById('verificationSkip');
+    const emailCodeGroup = document.getElementById('emailCodeGroup');
+    const phoneCodeGroup = document.getElementById('phoneCodeGroup');
+
+    // state
+    let currentFlow = 'login'; // login, signup, verify, 2fa, verification
+    let otpCountdown = 30;
+    let otpInterval;
+    let simulatedOtp = '123456'; // in real life server tells you / emails it
+    let simulated2fa = '654321';
+    let simulatedUser = null;
+    
+    // Verification state
+    let verificationState = {
+      emailVerified: false,
+      phoneVerified: false,
+      emailCodeSent: false,
+      phoneCodeSent: false
+    };
+
+    // Accessibility focus helper
+    function focusFirstInput(section){
+      const first = section.querySelector('input, select, button');
+      if(first) first.focus();
+    }
+
+    // Theme management (persisted)
+    function applySavedTheme(){
+      const saved = localStorage.getItem('tukopax_theme') || 'light';
+      if(saved === 'dark'){
+        body.classList.add('dark-theme');
+      } else {
+        body.classList.remove('dark-theme');
+      }
+    }
+    applySavedTheme();
+
+    function toggleThemeUI(){
+      // quick flip visual, then toggle theme variable
+      body.classList.add('flip');
+      setTimeout(()=> {
+        body.classList.toggle('dark-theme');
+        const isDark = body.classList.contains('dark-theme');
+        localStorage.setItem('tukopax_theme', isDark ? 'dark' : 'light');
+      }, 280);
+      setTimeout(()=> body.classList.remove('flip'), 800);
+    }
+    themeBtnHeader.addEventListener('click', toggleThemeUI);
+    // Add this function near your other utility functions
+function setLoadingState(buttonId, isLoading) {
+  const btn = document.getElementById(buttonId);
+  if (!btn) return;
+  
+  if (isLoading) {
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+    btn.disabled = true;
+  } else {
+    if (buttonId === 'loginSubmit') {
+      btn.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i> Sign In';
+    } else if (buttonId === 'signupSubmit') {
+      btn.innerHTML = 'Create Account';
+    }
+    btn.disabled = false;
+  }
+}
+
+// Update the login form submit handler to use loading state
+loginForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
+
+  if(!email || !password){
+    showToast('Please provide email and password');
+    return;
+  }
+
+  setLoadingState('loginSubmit', true);
+  try {
+    const resp = await fakeApi.signIn({ email, password });
+    if(resp.requiresVerification){
+      simulatedUser = { email, id: resp.userId, verified: false };
+      tabVerify.disabled = false;
+      switchTab('verify');
+      startOtpCountdown();
+      showToast('Verification code sent to email (simulated)');
+    } else {
+      completeAuth(resp.userId, resp.token);
+    }
+  } catch(err){
+    showToast(err.message || 'Sign in failed');
+  } finally {
+    setLoadingState('loginSubmit', false);
+  }
+});
+
+    // Tabs - simple show/hide
+    function switchTab(tabName){
+      currentFlow = tabName;
+      // reset active classes
+      [tabLogin, tabSignup, tabVerify].forEach(t => t.classList.remove('active'));
+      // hide all panels
+      [panelLogin, panelSignup, panelVerify, panel2FA, panelVerification].forEach(p => p.classList.add('hidden'));
+
+      if(tabName === 'login'){
+        tabLogin.classList.add('active');
+        panelLogin.classList.remove('hidden');
+        document.getElementById('authTitle').textContent = 'Sign in — Tukopax Vault';
+        focusFirstInput(panelLogin);
+      } else if(tabName === 'signup'){
+        tabSignup.classList.add('active');
+        panelSignup.classList.remove('hidden');
+        document.getElementById('authTitle').textContent = 'Create account — Tukopax';
+        focusFirstInput(panelSignup);
+      } else if(tabName === 'verify'){
+        tabVerify.classList.add('active');
+        panelVerify.classList.remove('hidden');
+        document.getElementById('authTitle').textContent = 'Verify — Tukopax';
+        focusFirstInput(panelVerify);
+      }
+      // reveal verify tab only when it becomes relevant
+      if(tabName !== 'verify') tabVerify.disabled = true;
+    }
+
+    // attach tab click handlers
+    [tabLogin, tabSignup, tabVerify].forEach(tab => {
+      tab.addEventListener('click', () => {
+        const t = tab.dataset.tab;
+        switchTab(t);
+      });
+    });
+
+    // initial
+    switchTab('login');
+
+    /*********************** Password strength (visual only) ************************/
+    function evaluatePasswordStrength(pw){
+      let score = 0;
+      if(pw.length >= 8) score += 1;
+      if(/[0-9]/.test(pw)) score += 1;
+      if(/[A-Z]/.test(pw)) score += 1;
+      if(/[^A-Za-z0-9]/.test(pw)) score += 1;
+      return Math.min(4, score);
+    }
+    signupPassword.addEventListener('input', (e)=>{
+      const score = evaluatePasswordStrength(e.target.value);
+      const width = (score / 4) * 100;
+      pwFill.style.width = width + '%';
+      // subtle color change using opacity only (keeps black/white)
+      pwFill.style.background = `linear-gradient(90deg, rgba(0,0,0,${0.12 + score*0.08}), rgba(0,0,0,${0.18 + score*0.08}))`;
+    });
+
+    /*********************** Login flow (mock) ************************************/
+    loginForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value;
+
+      if(!email || !password){
+        showToast('Please provide email and password');
+        return;
+      }
+
+      // simulate server auth
+      showToast('Signing in...');
+      try {
+        const resp = await fakeApi.signIn({ email, password });
+        // server requests verification step (OTP or 2FA)
+        if(resp.requiresVerification){
+          // mark current user
+          simulatedUser = { email, id: resp.userId, verified: false };
+          // enable verify tab and switch to it
+          tabVerify.disabled = false;
+          switchTab('verify');
+          startOtpCountdown();
+          showToast('Verification code sent to email (simulated)');
+        } else {
+          // fully authenticated -> redirect to dashboard
+          completeAuth(resp.userId, resp.token);
+        }
+      } catch(err){
+        showToast(err.message || 'Sign in failed');
+      }
+    });
+
+    /*********************** Signup flow (mock) ************************************/
+    document.getElementById('signupSubmit').addEventListener('click', async ()=>{
+      const name = signupName.value.trim();
+      const email = signupEmail.value.trim();
+      const pw = signupPassword.value;
+      const country = signupCountry.value;
+
+      if(!name || !email || !pw){
+        showToast('Please complete all fields');
+        return;
+      }
+      if(evaluatePasswordStrength(pw) < 2){
+        showToast('Choose a stronger password');
+        return;
+      }
+
+      showToast('Creating account (simulated)...');
+      try {
+        const resp = await fakeApi.signUp({ name, email, password: pw, country });
+        // after signup, prompt verify
+        simulatedUser = { email, id: resp.userId, verified: false };
+        tabVerify.disabled = false;
+        switchTab('verify');
+        startOtpCountdown();
+        showToast('Verification code sent to email (simulated)');
+      } catch(err){
+        showToast(err.message || 'Sign up failed');
+      }
+    });
+
+    // Social signup/login buttons - open respective OAuth endpoints (placeholders)
+    document.getElementById('btnGoogle').addEventListener('click', () => {
+      window.location.href = '/auth/google'; // server side OAuth flow
+    });
+    document.getElementById('signupSocialGoogle').addEventListener('click', () => {
+      window.location.href = '/auth/google';
+    });
+    document.getElementById('signupSocialInsta').addEventListener('click', () => {
+      window.location.href = '/auth/instagram';
+    });
+    document.getElementById('btnFacebook').addEventListener('click', () => {
+      window.location.href = '/auth/facebook';
+    });
+    document.getElementById('btnX').addEventListener('click', () => {
+      window.location.href = '/auth/x';
+    });
+
+    /*********************** OTP / Verification handling ***************************/
+    function startOtpCountdown(seconds = 30){
+      clearInterval(otpInterval);
+      otpCountdown = seconds;
+      otpTimer.textContent = `Resend in 00:${String(otpCountdown).padStart(2,'0')}`;
+      resendOtp.classList.add('hidden');
+      otpInterval = setInterval(()=>{
+        otpCountdown--;
+        if(otpCountdown <= 0){
+          clearInterval(otpInterval);
+          otpTimer.textContent = '';
+          resendOtp.classList.remove('hidden');
+        } else {
+          otpTimer.textContent = `Resend in 00:${String(otpCountdown).padStart(2,'0')}`;
+        }
+      }, 1000);
+      // reset inputs
+      otpInputs.forEach(i => i.value = '');
+      otpInputs[0].focus();
+    }
+
+    // wire otp keyboard navigation
+    otpInputs.forEach((input, idx) => {
+      input.addEventListener('input', (e)=>{
+        const v = e.target.value;
+        if(v.length > 1) e.target.value = v.slice(-1);
+        if(v.length === 1 && idx < otpInputs.length - 1) otpInputs[idx+1].focus();
+      });
+      input.addEventListener('keydown', (e)=>{
+        if(e.key === 'Backspace' && !e.target.value && idx > 0){
+          otpInputs[idx-1].focus();
+        }
+      });
+    });
+
+    resendOtp.addEventListener('click', ()=> {
+      // simulate resend
+      simulatedOtp = fakeApi.generateOtp(); // new code
+      startOtpCountdown(30);
+      showToast('Verification code resent (simulated).');
+    });
+
+    verifySubmit.addEventListener('click', async ()=> {
+      const code = otpInputs.map(i=>i.value).join('');
+      if(code.length !== 6){
+        showToast('Enter the 6-digit code');
+        return;
+      }
+      showToast('Verifying code...');
+      // simulate verification call
+      try {
+        const ok = await fakeApi.verifyOtp({ userId: simulatedUser?.id ?? 'temp', code });
+        if(ok){
+          showToast('Verified — proceeding to 2FA');
+          // enable 2fa panel
+          panelVerify.classList.add('hidden');
+          panel2FA.classList.remove('hidden');
+          // allow tab verify
+          tabVerify.classList.add('active');
+        } else {
+          showToast('Invalid code');
+        }
+      } catch(err){
+        showToast('Verification failed');
+      }
+    });
+
+    /*********************** 2FA handling ***************************/
+    twofaSubmit.addEventListener('click', async ()=>{
+      const code = twofaCode.value.trim();
+      if(!code || code.length < 4){
+        showToast('Enter 2FA code');
+        return;
+      }
+      showToast('Validating 2FA...');
+      try {
+        const ok = await fakeApi.verify2FA({ userId: simulatedUser?.id ?? 'temp', code });
+        if(ok){
+          showToast('2FA confirmed, finishing sign in...');
+          // proceed to verification step
+          panel2FA.classList.add('hidden');
+          panelVerification.classList.remove('hidden');
+          
+          // Pre-fill email if available
+          if(simulatedUser?.email) {
+            document.getElementById('verificationEmail').value = simulatedUser.email;
+          }
+          focusFirstInput(panelVerification);
+        } else {
+          showToast('Invalid 2FA code');
+        }
+      } catch(err){
+        showToast('Error validating 2FA');
+      }
+    });
+
+    twofaSkip.addEventListener('click', ()=>{
+      // Skip 2FA but limit access
+      showToast('2FA skipped — limited access granted');
+      // go to verification panel
+      panel2FA.classList.add('hidden');
+      panelVerification.classList.remove('hidden');
+      
+      // Pre-fill email if available
+      if(simulatedUser?.email) {
+        document.getElementById('verificationEmail').value = simulatedUser.email;
+      }
+      focusFirstInput(panelVerification);
+    });
+
+    /*********************** Verification handling ***************************/
+    verifyEmailBtn.addEventListener('click', async () => {
+      const email = simulatedUser?.email || document.getElementById('verificationEmail').value;
+      if (!email) {
+        showToast('Please enter a valid email');
+        return;
+      }
+      
+      showToast('Sending verification code to email...');
+      try {
+        await fakeApi.sendEmailVerification(email);
+        emailCodeGroup.classList.remove('hidden');
+        verificationState.emailCodeSent = true;
+        showToast('Verification code sent to email');
+      } catch (err) {
+        showToast('Failed to send email code');
+      }
+    });
+
+    verifyPhoneBtn.addEventListener('click', async () => {
+      const phone = document.getElementById('verificationPhone').value;
+      if (!phone) {
+        showToast('Please enter a valid phone number');
+        return;
+      }
+      
+      showToast('Sending SMS verification code...');
+      try {
+        await fakeApi.sendPhoneVerification(phone);
+        phoneCodeGroup.classList.remove('hidden');
+        verificationState.phoneCodeSent = true;
+        showToast('Verification code sent via SMS');
+      } catch (err) {
+        showToast('Failed to send SMS code');
+      }
+    });
+
+    submitEmailCode.addEventListener('click', async () => {
+      const code = document.getElementById('emailVerificationCode').value;
+      if (!code || code.length !== 6) {
+        showToast('Enter the 6-digit code');
+        return;
+      }
+      
+      try {
+        const verified = await fakeApi.verifyEmailCode(code);
+        if (verified) {
+          verificationState.emailVerified = true;
+          showToast('Email verified successfully');
+          checkVerificationComplete();
+        } else {
+          showToast('Invalid verification code');
+        }
+      } catch (err) {
+        showToast('Email verification failed');
+      }
+    });
+
+    submitPhoneCode.addEventListener('click', async () => {
+      const code = document.getElementById('phoneVerificationCode').value;
+      if (!code || code.length !== 6) {
+        showToast('Enter the 6-digit code');
+        return;
+      }
+      
+      try {
+        const verified = await fakeApi.verifyPhoneCode(code);
+        if (verified) {
+          verificationState.phoneVerified = true;
+          showToast('Phone number verified successfully');
+          checkVerificationComplete();
+        } else {
+          showToast('Invalid verification code');
+        }
+      } catch (err) {
+        showToast('Phone verification failed');
+      }
+    });
+
+    function checkVerificationComplete() {
+      if (verificationState.emailVerified && verificationState.phoneVerified) {
+        verificationComplete.disabled = false;
+        showToast('All verifications complete!');
+      }
+    }
+
+    verificationComplete.addEventListener('click', () => {
+      showToast('Account fully verified! Redirecting...');
+      finalizeLogin();
+    });
+
+    verificationSkip.addEventListener('click', () => {
+      showToast('Verification skipped - some features may be limited');
+      finalizeLogin();
+    });
+
+    /*********************** Finalize & redirect to dashboard ***************************/
+    function finalizeLogin(){
+      // Perform any post-auth steps, then redirect to dashboard
+      // We simulate a small delay and then redirect
+      setTimeout(()=> {
+        showToast('Entering Tukopax Vault…');
+        // In real app, set session/cookie here for authenticated user
+        // Redirect:
+        setTimeout(()=> {
+          // For demo, just show a success overlay and do not actually redirect to a missing page.
+          // Replace `window.location.href` with the actual dashboard path in production.
+          window.location.href = "dashboard.html";
+        }, 600);
+      }, 400);
+    }
+
+    function completeAuth(userId, token){
+      // Called when server says sign in is fully completed (no additional verification required)
+      simulatedUser = { id: userId };
+      // store token safely (in secure cookie / httpOnly on server) — do NOT store JWT in localStorage unless unavoidable
+      finalizeLogin();
+    }
+
+    /*********************** Misc UI helpers ***************************/
+    function showToast(msg, timeout = 1800){
+      authToastMsg.textContent = msg;
+      authToast.style.display = 'block';
+      setTimeout(()=> authToast.style.opacity = '1', 50);
+      clearTimeout(authToast._t);
+      authToast._t = setTimeout(()=>{
+        authToast.style.opacity = '0';
+        setTimeout(()=> authToast.style.display = 'none', 250);
+      }, timeout);
+    }
+
+    // helper for opening the verification modal
+    document.getElementById('openVerification').addEventListener('click', ()=> {
+      tabVerify.disabled = false;
+      switchTab('verify');
+      panelVerification.classList.remove('hidden');
+      showToast('Verification panel opened'); 
+    });
+
+    document.getElementById('forgotPasswordBtn').addEventListener('click', ()=> {
+      showToast('Password reset flow not implemented here — hook to server reset endpoint.');
+    });
+
+    document.getElementById('helpBtn').addEventListener('click', ()=> {
+      showToast('Open support chat — integrate with Intercom / Crisp / custom chat.');
+    });
+
+    document.getElementById('contactSupport').addEventListener('click', ()=> {
+      showToast('Contact support at support@tukopax.example (placeholder).');
+    });
+
+    document.getElementById('learnMore').addEventListener('click', ()=> {
+      showToast('Learn more page placeholder — link to docs or modal.');
+    });
+
+    /*********************** Mock server API (simulation) ***************************/
+    // Replace these with fetch() calls to your backend in production.
+    const fakeApi = {
+      signIn: async ({ email, password }) => {
+        await sleep(700);
+        // simple check: any password 'password123' succeeds without verification, else require verification
+        if(password === 'password123'){
+          return { requiresVerification: false, userId: 'user_abc', token: 'tok_example' };
+        }
+        // else require verification
+        return { requiresVerification: true, userId: 'user_reqverify' };
+      },
+      signUp: async ({ name, email, password, country }) => {
+        await sleep(700);
+        // simulate rate-limit / duplicate
+        if(email.includes('taken')) throw new Error('Email already exists');
+        return { userId: 'new_user_' + Date.now() };
+      },
+      generateOtp: () => {
+        simulatedOtp = String(Math.floor(100000 + Math.random() * 900000));
+        // console.log('simulated OTP:', simulatedOtp);
+        return simulatedOtp;
+      },
+      verifyOtp: async ({ userId, code }) => {
+        await sleep(500);
+        // For demo accept either '123456' or simulatedOtp
+        return code === '123456' || code === simulatedOtp;
+      },
+      verify2FA: async ({ userId, code }) => {
+        await sleep(500);
+        // Accept '654321' as known code or any 6-digit for demo
+        return code === '654321' || /^\d{6}$/.test(code);
+      },
+      sendEmailVerification: async (email) => {
+        await sleep(700);
+        return true;
+      },
+      sendPhoneVerification: async (phone) => {
+        await sleep(700);
+        return true;
+      },
+      verifyEmailCode: async (code) => {
+        await sleep(500);
+        // For demo accept either '123456' or simulatedOtp
+        return code === '123456' || code === simulatedOtp;
+      },
+      verifyPhoneCode: async (code) => {
+        await sleep(500);
+        return code === '654321' || /^\d{6}$/.test(code);
+      }
+    };
+
+    function sleep(ms){ return new Promise(res=>setTimeout(res, ms)); }
+    /*********************** Country Selector ************************/
+function initCountrySelector() {
+    const countrySelector = document.querySelector('.country-selector');
+    const selectedCountry = countrySelector.querySelector('.selected-country');
+    const dropdownItems = countrySelector.querySelectorAll('.dropdown-item');
+    const searchInput = countrySelector.querySelector('.search-country');
+    const hiddenSelect = countrySelector.querySelector('#signupCountry');
+
+    // Handle country selection
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const name = item.dataset.name;
+            const code = item.dataset.code;
+            const flag = item.dataset.flag;
+            
+            // Update selected country display
+            selectedCountry.querySelector('.flag').textContent = flag;
+            selectedCountry.querySelector('.country-name').textContent = name;
+            selectedCountry.querySelector('.country-code').textContent = code;
+            
+            // Update hidden select
+            hiddenSelect.value = name;
+        });
+    });
+
+    // Handle search
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        dropdownItems.forEach(item => {
+            const name = item.dataset.name.toLowerCase();
+            const code = item.dataset.code.toLowerCase();
+            if (name.includes(searchTerm) || code.includes(searchTerm)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!countrySelector.contains(e.target)) {
+            const dropdownMenu = countrySelector.querySelector('.dropdown-menu');
+            dropdownMenu.classList.remove('show');
+        }
+    });
+
+    // Mobile optimization: make dropdown full width on small screens
+    if (window.innerWidth < 768) {
+        const dropdownMenu = countrySelector.querySelector('.dropdown-menu');
+        dropdownMenu.style.width = '100%';
+        dropdownMenu.style.left = '0';
+        dropdownMenu.style.right = '0';
+    }
+}
+
+/*********************** Initialization ***************************/
+// pre-generate OTP (simulated)
+fakeApi.generateOtp();
+
+// when page loads, autofocus first input and initialize country selector
+window.addEventListener('load', ()=> {
+    focusFirstInput(panelLogin);
+    initCountrySelector();
+});
+
+    /*********************** Initialization ***************************/
+    // Add this to your initialization section
+document.getElementById('togglePassword')?.addEventListener('click', function() {
+  const passwordInput = document.getElementById('loginPassword');
+  const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+  passwordInput.setAttribute('type', type);
+  this.innerHTML = type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+  this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+});
+// Update this in your initialization section
+window.addEventListener('load', ()=> {
+  focusFirstInput(panelLogin);
+  initCountrySelector();
+  
+  // Initialize password toggle if it exists
+  if (document.getElementById('togglePassword')) {
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordInput = document.getElementById('loginPassword');
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.innerHTML = type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+    });
+  }
+});
+    // pre-generate OTP (simulated)
+    fakeApi.generateOtp();
+
+    // when page loads, autofocus first input
+    window.addEventListener('load', ()=> {
+      focusFirstInput(panelLogin);
+    });
+
+    // allow pressing Enter to submit OTP when complete
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){
+        if(!panelLogin.classList.contains('hidden') && document.activeElement.closest('#panel-login')){
+          // trigger login form
+          loginForm.dispatchEvent(new Event('submit', { cancelable:true }));
+        } else if(!panelVerify.classList.contains('hidden')){
+          verifySubmit.click();
+        } else if(!panel2FA.classList.contains('hidden')){
+          twofaSubmit.click();
+        } else if(!panelVerification.classList.contains('hidden')){
+          // In verification panel, check which field is focused
+          if(document.activeElement.id === 'emailVerificationCode') {
+            submitEmailCode.click();
+          } else if(document.activeElement.id === 'phoneVerificationCode') {
+            submitPhoneCode.click();
+          } else {
+            verificationComplete.click();
+          }
+        }
+      }
+    });
+
+    // Ensure clicking tabs does not scroll odd places on mobile
+    document.querySelectorAll('.nav-auth .nav-link').forEach(btn => {
+      btn.addEventListener('click', (ev)=>{
+        ev.preventDefault();
+      });
+    });
+
+    /*********************** End of file ***************************/
+  </script>
+</body>
+</html>

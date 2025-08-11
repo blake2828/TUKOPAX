@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accounts | Tukopax</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    /* -- Palette: strict black & white with grays -- */
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --gray-light: #f8f9fa;
+      --gray-mid: #6c757d;
+      --gray-dark: #343a40;
+      --border-gray: #ced4da;
+      --shadow-dark: rgba(0,0,0,0.25);
+    }
+
+    /* Body & layout */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--white);
+      color: var(--black);
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.6s ease, color 0.6s ease;
+      perspective: 1200px; /* for 3D flip */
+    }
+
+    body.dark-mode {
+      background-color: var(--black);
+      color: var(--white);
+    }
+
+    /* Flip container for animation */
+   
+    /* Card styles */
+    .balance-card {
+      background-color: var(--white);
+      color: var(--black);
+      border: 2px solid var(--black);
+      border-radius: 12px;
+      box-shadow: 0 4px 10px var(--shadow-dark);
+      user-select: none;
+      transition: background-color 0.6s ease, color 0.6s ease, box-shadow 0.4s ease;
+      cursor: default;
+    }
+    body.dark-mode .balance-card {
+      background-color: var(--black);
+      color: var(--white);
+      border-color: var(--white);
+      box-shadow: 0 4px 10px rgba(255 255 255 / 0.3);
+    }
+    .balance-card:hover, .balance-card:focus {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px var(--shadow-dark);
+      outline: none;
+    }
+
+    /* Headings */
+    h1, h4 {
+      font-weight: 700;
+      color: var(--black);
+      transition: color 0.6s ease;
+    }
+    body.dark-mode h1,
+    body.dark-mode h4 {
+      color: var(--white);
+    }
+
+    /* Buttons */
+    .btn-tukopax {
+      background-color: var(--black);
+      color: var(--white);
+      border: 2px solid var(--black);
+      border-radius: 30px;
+      font-weight: 600;
+      padding: 0.5rem 1.2rem;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+    }
+    .btn-tukopax:hover:not(:disabled),
+    .btn-tukopax:focus:not(:disabled) {
+      background-color: var(--white);
+      color: var(--black);
+      border-color: var(--black);
+      outline: none;
+      box-shadow: 0 0 0 3px var(--gray-mid);
+    }
+    .btn-tukopax:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    body.dark-mode .btn-tukopax {
+      background-color: var(--white);
+      color: var(--black);
+      border-color: var(--white);
+    }
+    body.dark-mode .btn-tukopax:hover:not(:disabled),
+    body.dark-mode .btn-tukopax:focus:not(:disabled) {
+      background-color: var(--black);
+      color: var(--white);
+      border-color: var(--white);
+      box-shadow: 0 0 0 3px var(--gray-mid);
+    }
+
+    /* Form inputs */
+    .form-control, .form-select {
+      border-radius: 8px;
+      border: 2px solid var(--black);
+      background-color: var(--white);
+      color: var(--black);
+      transition: background-color 0.6s ease, color 0.6s ease, border-color 0.3s ease;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--gray-mid);
+      box-shadow: 0 0 0 0.2rem var(--gray-mid);
+      outline: none;
+    }
+    body.dark-mode .form-control, body.dark-mode .form-select {
+      background-color: var(--black);
+      color: var(--white);
+      border-color: var(--white);
+    }
+    body.dark-mode .form-control:focus, body.dark-mode .form-select:focus {
+      border-color: var(--gray-mid);
+      box-shadow: 0 0 0 0.2rem var(--gray-mid);
+      outline: none;
+    }
+
+    /* Section box */
+    .section-box {
+      background-color: var(--white);
+      border: 2px solid var(--black);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: background-color 0.6s ease, border-color 0.3s ease;
+      box-shadow: 0 4px 12px var(--shadow-dark);
+    }
+    body.dark-mode .section-box {
+      background-color: var(--black);
+      border-color: var(--white);
+      box-shadow: 0 4px 12px rgba(255 255 255 / 0.2);
+    }
+
+    /* Theme toggle button */
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1050;
+      background-color: var(--white);
+      color: var(--black);
+      border: 2px solid var(--black);
+      border-radius: 30px;
+      padding: 0.4rem 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+      transition: background-color 0.6s ease, color 0.6s ease, border-color 0.3s ease;
+    }
+    .theme-toggle:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px var(--gray-mid);
+    }
+    body.dark-mode .theme-toggle {
+      background-color: var(--black);
+      color: var(--white);
+      border-color: var(--white);
+    }
+
+    /* Success alert */
+    #success-alert {
+      display: none;
+      position: fixed;
+      top: 5rem;
+      right: 1rem;
+      z-index: 1100;
+      min-width: 250px;
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      background-color: var(--black);
+      color: var(--white);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+      font-weight: 600;
+    }
+    body.dark-mode #success-alert {
+      background-color: var(--white);
+      color: var(--black);
+      box-shadow: 0 2px 12px rgba(255 255 255, 0.6);
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 576px) {
+      .balance-card p.fs-4 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body onload="loadTheme()">
+
+  <div id="flip-container" tabindex="0" aria-live="polite">
+
+    <button class="btn theme-toggle" aria-label="Toggle dark/light theme" onclick="toggleTheme()">
+      <i class="bi bi-arrow-repeat"></i> Toggle Theme
+    </button>
+
+    <div class="container py-5">
+      <h1 class="mb-5 text-center">My Account Overview</h1>
+
+      <div class="row g-4" role="list">
+        <div class="col-md-4" role="listitem">
+          <div class="balance-card card p-4" tabindex="0" aria-label="Main Account Balance: KES 12,000">
+            <h5>Main Account Balance</h5>
+            <p class="fs-4 fw-bold">KES 12,000</p>
+          </div>
+        </div>
+        <div class="col-md-4" role="listitem">
+          <div class="balance-card card p-4" tabindex="0" aria-label="Escrow Balance: KES 8,500">
+            <h5>Escrow Balance</h5>
+            <p class="fs-4 fw-bold">KES 8,500</p>
+          </div>
+        </div>
+        <div class="col-md-4" role="listitem">
+          <div class="balance-card card p-4" tabindex="0" aria-label="Locked or Held Amount: KES 4,200">
+            <h5>Locked / Held Amount</h5>
+            <p class="fs-4 fw-bold">KES 4,200</p>
+          </div>
+        </div>
+        <div class="col-md-4" role="listitem">
+          <div class="balance-card card p-4" tabindex="0" aria-label="Disputed Amount: KES 1,100">
+            <h5>Disputed Amount</h5>
+            <p class="fs-4 fw-bold">KES 1,100</p>
+          </div>
+        </div>
+        <div class="col-md-4" role="listitem">
+          <div class="balance-card card p-4" tabindex="0" aria-label="Settled Balance: KES 2,700">
+            <h5>Settled Balance</h5>
+            <p class="fs-4 fw-bold">KES 2,700</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5 d-flex flex-wrap justify-content-center gap-3" role="group" aria-label="Account actions">
+        <button class="btn btn-tukopax" type="button" aria-label="Deposit funds">
+          <i class="bi bi-plus-circle"></i> Deposit
+        </button>
+        <button class="btn btn-tukopax" type="button" aria-label="Withdraw funds">
+          <i class="bi bi-credit-card"></i> Withdraw
+        </button>
+        <button class="btn btn-tukopax" type="button" aria-label="Transfer funds to main account">
+          <i class="bi bi-arrow-left-right"></i> Transfer to Main
+        </button>
+      </div>
+
+      <section class="mt-5 section-box" aria-label="Move funds between accounts">
+        <h4>Move Funds Between Accounts</h4>
+        <form class="row g-3 mt-3" id="transfer-form" aria-live="polite" aria-relevant="additions">
+          <div class="col-md-4">
+            <label for="from" class="form-label">From</label>
+            <select id="from" class="form-select" required aria-required="true" aria-describedby="fromHelp">
+              <option value="" disabled selected>Select source account</option>
+              <option value="main">Main Account</option>
+              <option value="settled">Settled Balance</option>
+            </select>
+            <div id="fromHelp" class="form-text">Select the account to move funds from.</div>
+          </div>
+          <div class="col-md-4">
+            <label for="to" class="form-label">To</label>
+            <select id="to" class="form-select" required aria-required="true" aria-describedby="toHelp">
+              <option value="" disabled selected>Select destination account</option>
+              <option value="escrow">Escrow</option>
+            </select>
+            <div id="toHelp" class="form-text">Select the account to move funds to.</div>
+          </div>
+          <div class="col-md-4">
+            <label for="amount" class="form-label">Amount (KES)</label>
+            <input
+              type="number"
+              min="1"
+              id="amount"
+              class="form-control"
+              placeholder="Enter amount"
+              required
+              aria-required="true"
+              aria-describedby="amountHelp"
+            />
+            <div id="amountHelp" class="form-text">Enter the amount to transfer.</div>
+          </div>
+          <div class="col-12 d-flex justify-content-center mt-3">
+            <button
+              type="submit"
+              class="btn btn-tukopax"
+              id="transfer-btn"
+              disabled
+              aria-disabled="true"
+            >
+              <i class="bi bi-arrow-right-circle"></i> Transfer Funds
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <!-- Success Alert -->
+  <div id="success-alert" role="alert" aria-live="assertive" aria-atomic="true">
+    Transfer completed successfully!
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Theme toggling with flip animation
+    function toggleTheme() {
+      const flipContainer = document.getElementById('flip-container');
+      flipContainer.style.pointerEvents = 'none'; // prevent rapid toggles
+      if (document.body.classList.contains('dark-mode')) {
+        // Going light
+        flipContainer.style.transform = 'rotateY(0deg)';
+        setTimeout(() => {
+          document.body.classList.remove('dark-mode');
+          flipContainer.style.pointerEvents = '';
+        }, 400);
+      } else {
+        // Going dark
+        flipContainer.style.transform = 'rotateY(180deg)';
+        setTimeout(() => {
+          document.body.classList.add('dark-mode');
+          flipContainer.style.pointerEvents = '';
+        }, 400);
+      }
+      localStorage.setItem(
+        'tukopaxTheme',
+        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+      );
+    }
+
+    // Load saved theme and apply flip state
+    function loadTheme() {
+      const saved = localStorage.getItem('tukopaxTheme');
+      const flipContainer = document.getElementById('flip-container');
+      if (saved === 'dark') {
+        document.body.classList.add('dark-mode');
+        flipContainer.style.transform = 'rotateY(180deg)';
+      } else {
+        document.body.classList.remove('dark-mode');
+        flipContainer.style.transform = 'rotateY(0deg)';
+      }
+    }
+
+    // Form validation logic
+    const form = document.getElementById('transfer-form');
+    const fromSelect = document.getElementById('from');
+    const toSelect = document.getElementById('to');
+    const amountInput = document.getElementById('amount');
+    const submitBtn = document.getElementById('transfer-btn');
+    const successAlert = document.getElementById('success-alert');
+
+    function validateForm() {
+      const fromVal = fromSelect.value;
+      const toVal = toSelect.value;
+      const amountVal = Number(amountInput.value);
+
+      if (
+        fromVal &&
+        toVal &&
+        fromVal !== toVal &&
+        amountVal > 0 &&
+        !isNaN(amountVal)
+      ) {
+        submitBtn.disabled = false;
+        submitBtn.setAttribute('aria-disabled', 'false');
+      } else {
+        submitBtn.disabled = true;
+        submitBtn.setAttribute('aria-disabled', 'true');
+      }
+    }
+
+    fromSelect.addEventListener('change', validateForm);
+    toSelect.addEventListener('change', validateForm);
+    amountInput.addEventListener('input', validateForm);
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      successAlert.style.display = 'block';
+
+      setTimeout(() => {
+        successAlert.style.display = 'none';
+      }, 3000);
+
+      form.reset();
+      validateForm();
+    });
+
+    window.onload = loadTheme;
+  </script>
+</body>
+</html>

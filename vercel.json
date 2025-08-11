@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "public": "ROUTES",
+  "builds": [
+    { "src": "ROUTES/**/*", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/$", "dest": "/ROUTES/index.html" },
+    { "src": "/([a-zA-Z0-9_-]+)$", "dest": "/ROUTES/$1.html" },
+    { "src": "/(.*)", "dest": "/ROUTES/$1" }
+  ]
+}

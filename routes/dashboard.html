@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tukopax Dashboard - Black & White Themes Only</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --sidebar-width-collapsed: 70px;
+      --sidebar-width-expanded: 220px;
+      --transition-duration: 0.4s;
+
+      /* Colors for black & white theme */
+      --color-black: #000;
+      --color-white: #fff;
+      --color-gray-light: #f5f5f5;
+      --color-gray-dark: #222;
+      --color-gray-mid: #777;
+      --color-border-light: #ddd;
+      --color-border-dark: #444;
+      --color-shadow-dark: rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: var(--color-black);
+      color: var(--color-white);
+      margin: 0;
+      min-height: 100vh;
+      transition: background-color 0.6s ease, color 0.6s ease;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.light-theme {
+      background: var(--color-white);
+      color: var(--color-gray-dark);
+    }
+
+    /* Container for flip animation */
+    #content {
+      transition: transform 0.6s ease;
+      transform-style: preserve-3d;
+      display: flex;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+    #content.flip {
+      animation: pageFlip 0.6s ease forwards;
+    }
+    @keyframes pageFlip {
+      0% { transform: rotateY(0deg); }
+      50% { transform: rotateY(90deg); }
+      100% { transform: rotateY(0deg); }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      height: 100vh;
+      background: var(--color-black);
+      transition: width var(--transition-duration) ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      width: var(--sidebar-width-expanded);
+      flex-shrink: 0;
+      position: relative;
+      color: var(--color-white);
+      user-select: none;
+      border-right: 1px solid var(--color-border-dark);
+    }
+    body.light-theme .sidebar {
+      background: var(--color-white);
+      color: var(--color-gray-dark);
+      border-right: 1px solid var(--color-border-light);
+    }
+    .sidebar.collapsed {
+      width: var(--sidebar-width-collapsed);
+    }
+
+    /* Sidebar header + toggle */
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+      border-bottom: 1px solid var(--color-border-dark);
+    }
+    body.light-theme .sidebar-header {
+      border-color: var(--color-border-light);
+    }
+
+    #sidebarToggleBtn {
+      background: none;
+      border: none;
+      color: inherit;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 4px;
+      transition: transform 0.3s ease;
+      user-select: none;
+    }
+    #sidebarToggleBtn:hover {
+      color: var(--color-gray-mid);
+      transform: rotate(90deg);
+    }
+
+    /* Nav links container */
+    .nav-links {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-top: 0.5rem;
+      padding-bottom: 1rem;
+    }
+
+    .nav-links::-webkit-scrollbar {
+      width: 6px;
+    }
+    .nav-links::-webkit-scrollbar-thumb {
+      background: var(--color-gray-mid);
+      border-radius: 10px;
+    }
+    .nav-links::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    /* Nav links */
+    .sidebar .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 18px;
+      font-weight: 600;
+      border-radius: 8px;
+      white-space: nowrap;
+      color: var(--color-white);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      user-select: none;
+    }
+    body.light-theme .sidebar .nav-link {
+      color: var(--color-gray-dark);
+    }
+    .sidebar .nav-link i {
+      min-width: 24px;
+      font-size: 1.25rem;
+      text-align: center;
+    }
+
+    /* Active & hover styles */
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      background-color: var(--color-gray-mid);
+      color: var(--color-white);
+    }
+    body.light-theme .sidebar .nav-link:hover,
+    body.light-theme .sidebar .nav-link.active {
+      background-color: var(--color-gray-light);
+      color: var(--color-gray-dark);
+    }
+
+    /* Hide labels in collapsed */
+    .sidebar.collapsed .nav-link span {
+      display: none;
+    }
+    /* Center icons when collapsed */
+    .sidebar.collapsed .nav-link {
+      justify-content: center;
+    }
+    .sidebar.collapsed .sidebar-header h2 {
+      display: none;
+    }
+
+    /* Main content */
+    main.flex-grow-1 {
+      flex-grow: 1;
+      transition: margin-left var(--transition-duration) ease;
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      background: transparent;
+    }
+    /* Adjust margin to sidebar width */
+    main.flex-grow-1.expanded {
+      margin-left: var(--sidebar-width-expanded);
+    }
+    main.flex-grow-1.collapsed {
+      margin-left: var(--sidebar-width-collapsed);
+    }
+
+    /* Top Bar */
+    #topBar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    #searchInput {
+      border-radius: 50px;
+      padding: 10px 20px;
+      border: 1px solid var(--color-border-light);
+      outline: none;
+      width: 50%;
+      background: transparent;
+      color: inherit;
+      transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+      font-size: 1rem;
+      min-width: 200px;
+      max-width: 100%;
+    }
+    body.light-theme #searchInput {
+      border-color: var(--color-border-dark);
+    }
+    #searchInput::placeholder {
+      color: var(--color-gray-mid);
+    }
+
+    /* Profile */
+    .profile-container {
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+      color: inherit;
+    }
+    .profile-container img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .text-success {
+      font-size: 14px;
+      color: #0f0;
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: 48px;
+      right: 0;
+      background-color: var(--color-black);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px var(--color-shadow-dark);
+      color: var(--color-white);
+      padding: 10px 16px;
+      display: none;
+      width: 160px;
+      user-select: auto;
+      z-index: 1500;
+      transition: background-color 0.4s ease;
+    }
+    body.light-theme .profile-dropdown {
+      background-color: var(--color-white);
+      color: var(--color-gray-dark);
+      box-shadow: 0 4px 12px rgba(0 0 0 / 0.1);
+    }
+    .profile-dropdown a {
+      display: block;
+      padding: 8px 0;
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .profile-dropdown a:hover {
+      color: var(--color-gray-mid);
+    }
+    .profile-dropdown.show {
+      display: block;
+    }
+
+    /* Cards Grid */
+    #productGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
+      gap: 1.5rem;
+    }
+
+    /* Netflix-style card */
+    .card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      cursor: pointer;
+      background-color: var(--color-black);
+      border: 1px solid var(--color-border-dark);
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+      box-shadow: 0 2px 6px var(--color-shadow-dark);
+      will-change: transform;
+      color: var(--color-white);
+      display: flex;
+      flex-direction: column;
+    }
+    body.light-theme .card {
+      background-color: var(--color-white);
+      border: 1px solid var(--color-border-light);
+      box-shadow: 0 2px 8px rgba(0 0 0 / 0.1);
+      color: var(--color-gray-dark);
+    }
+
+    /* Image inside card */
+    .card-img-top {
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      object-fit: cover;
+      width: 100%;
+      height: 160px;
+      transition: transform 0.35s ease;
+      flex-shrink: 0;
+      filter: grayscale(0%);
+      background: var(--color-gray-light);
+    }
+
+    /* Overlay with product info */
+    .card-body {
+      padding: 0.8rem 1rem;
+      position: relative;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Title and seller */
+    .card-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+      transition: color 0.3s ease;
+    }
+    .card-text {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-bottom: 0.6rem;
+      transition: opacity 0.3s ease;
+    }
+    body.light-theme .card-text {
+      opacity: 0.7;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background-color: var(--color-white);
+      color: var(--color-black);
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      padding: 6px 15px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      user-select: none;
+    }
+    .btn-primary:hover {
+      background-color: var(--color-gray-light);
+      color: var(--color-gray-dark);
+    }
+    .btn-outline-secondary {
+      border-radius: 30px;
+      border-color: var(--color-white);
+      color: var(--color-white);
+      user-select: none;
+    }
+    .btn-outline-secondary:hover {
+      background-color: var(--color-white);
+      color: var(--color-black);
+      border-color: var(--color-black);
+    }
+    body.light-theme .btn-outline-secondary {
+      border-color: var(--color-black);
+      color: var(--color-black);
+    }
+    body.light-theme .btn-outline-secondary:hover {
+      background-color: var(--color-black);
+      color: var(--color-white);
+      border-color: var(--color-white);
+    }
+
+    /* Hover / Focus / Active Zoom effect */
+    .card:hover,
+    .card:focus-within,
+    .card:active {
+      transform: scale(1.07);
+      border-color: var(--color-gray-mid);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+      z-index: 5;
+    }
+    .card:hover .card-img-top,
+    .card:focus-within .card-img-top,
+    .card:active .card-img-top {
+      transform: scale(1.1);
+      filter: grayscale(0%);
+    }
+
+    /* Theme Toggle Button */
+    #themeToggleBtn {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.6rem;
+      color: var(--color-white);
+      transition: color 0.4s ease;
+      z-index: 2000;
+      user-select: none;
+    }
+    body.light-theme #themeToggleBtn {
+      color: var(--color-gray-dark);
+    }
+    #themeToggleBtn:focus {
+      outline: none;
+    }
+
+    /* Responsive for small screens */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        z-index: 3000;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        transition: transform 0.3s ease;
+      }
+      .sidebar.collapsed {
+        transform: translateX(calc(-1 * var(--sidebar-width-collapsed)));
+      }
+      main.flex-grow-1 {
+        margin-left: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body class="dark-theme">
+
+  <!-- Theme Toggle Button -->
+  <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle theme">
+    <i class="bi bi-moon-fill"></i>
+  </button>
+
+  <div id="content">
+    <!-- Sidebar -->
+    <aside class="sidebar expanded" id="sidebar" aria-label="Main Navigation">
+  <div class="sidebar-header">
+    <h2>Tukopax</h2>
+    <button id="sidebarToggleBtn" aria-label="Toggle sidebar" title="Toggle sidebar">
+      <i class="bi bi-list"></i>
+    </button>
+  </div>
+  <nav class="nav-links" role="navigation">
+    <a href="marketplace.html" class="nav-link active"><i class="bi bi-shop"></i> <span>Marketplace</span></a>
+    <a href="escrowmatch.html" class="nav-link"><i class="bi bi-robot"></i> <span>P2P Match AI</span></a>
+    <a href="orders.html" class="nav-link"><i class="bi bi-box-seam"></i> <span>Orders</span></a>
+    <a href="accounts.html" class="nav-link"><i class="bi bi-person"></i> <span>Accounts</span></a>
+    <a href="resolutioncenter.html" class="nav-link"><i class="bi bi-shield-check"></i> <span>Resolution Center</span></a>
+    <a href="purchasehistory.html" class="nav-link"><i class="bi bi-clock-history"></i> <span>Purchase History</span></a>
+  </nav>
+</aside>
+
+
+    <!-- Main Content -->
+    <main class="flex-grow-1 expanded" id="mainContent" tabindex="0">
+      <!-- Top Bar -->
+      <div id="topBar">
+        <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off" />
+        <div class="profile-container" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" aria-label="User menu" onclick="toggleProfileDropdown()" onkeydown="if(event.key==='Enter' || event.key===' ') toggleProfileDropdown()">
+          <img src="https://via.placeholder.com/32" alt="User avatar" />
+          <span>John Doe (Verified)</span>
+          <span class="ms-2 text-success">●</span>
+          <div id="profileDropdown" class="profile-dropdown" role="menu" aria-hidden="true">
+            <a href="#" role="menuitem">🔔 Notifications</a>
+            <a href="#" role="menuitem">👤 View Profile</a>
+            <a href="#" role="menuitem">⚙️ Settings</a>
+            <a href="#" role="menuitem" onclick="toggleTheme(); return false;">🌓 Toggle Theme</a>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="mb-4">Marketplace</h2>
+      <div id="productGrid" aria-live="polite" aria-atomic="true"></div>
+    </main>
+  </div>
+
+  <script>
+    // Product Data
+    const productData = [
+      { title: "iPhone 13 Pro", seller: "VerifiedTech", image: "https://picsum.photos/300/200?random=1" },
+      { title: "Samsung TV 55\"", seller: "JumiaStore", image: "https://picsum.photos/300/200?random=2" },
+      { title: "AirPods Max", seller: "LegitGear", image: "https://picsum.photos/300/200?random=3" },
+      { title: "MacBook Air M2", seller: "ByteHub", image: "https://picsum.photos/300/200?random=4" },
+      { title: "Gaming Console X", seller: "GamerBay", image: "https://picsum.photos/300/200?random=5" },
+      { title: "Canon EOS 80D", seller: "NairobiCams", image: "https://picsum.photos/300/200?random=6" },
+      { title: "Dell XPS 13", seller: "LaptopZone", image: "https://picsum.photos/300/200?random=7" },
+      { title: "Sony WH-1000XM4", seller: "SoundHub", image: "https://picsum.photos/300/200?random=8" },
+      { title: "iPad Pro 12.9\"", seller: "iStoreKE", image: "https://picsum.photos/300/200?random=9" },
+      { title: "Logitech MX Master 3", seller: "TechCart", image: "https://picsum.photos/300/200?random=10" },
+      { title: "Apple Watch Series 8", seller: "WatchWorld", image: "https://picsum.photos/300/200?random=11" },
+      { title: "Razer Blade 15", seller: "GameShack", image: "https://picsum.photos/300/200?random=12" }
+    ];
+
+    // Render product cards
+    const grid = document.getElementById('productGrid');
+    productData.forEach(product => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.tabIndex = 0;
+      card.innerHTML = `
+        <img src="${product.image}" alt="${product.title}" class="card-img-top" />
+        <div class="card-body">
+          <h5 class="card-title">${product.title}</h5>
+          <p class="card-text">Seller: ${product.seller}</p>
+          <div>
+            <button class="btn btn-primary btn-sm me-2">Buy Now</button>
+            <button class="btn btn-outline-secondary btn-sm">💬 Chat</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Profile dropdown toggle
+    function toggleProfileDropdown() {
+      const dropdown = document.getElementById('profileDropdown');
+      dropdown.classList.toggle('show');
+      const expanded = dropdown.classList.contains('show');
+      const container = document.querySelector('.profile-container');
+      container.setAttribute('aria-expanded', expanded);
+      dropdown.setAttribute('aria-hidden', !expanded);
+    }
+
+    // Close profile dropdown when clicking outside
+    window.addEventListener('click', e => {
+      const profile = document.getElementById('profileDropdown');
+      const container = document.querySelector('.profile-container');
+      if (!container.contains(e.target)) {
+        profile.classList.remove('show');
+        container.setAttribute('aria-expanded', false);
+        profile.setAttribute('aria-hidden', true);
+      }
+    });
+
+    // Search filter
+    document.getElementById('searchInput').addEventListener('input', e => {
+      const term = e.target.value.toLowerCase();
+      document.querySelectorAll('#productGrid .card').forEach(card => {
+        const title = card.querySelector('h5').textContent.toLowerCase();
+        card.style.display = title.includes(term) ? '' : 'none';
+      });
+    });
+
+    // Theme toggle with page flip animation
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const content = document.getElementById('content');
+    function toggleTheme() {
+      content.classList.add('flip');
+      setTimeout(() => {
+        document.body.classList.toggle('dark-theme');
+        document.body.classList.toggle('light-theme');
+
+        if (document.body.classList.contains('dark-theme')) {
+          themeBtn.innerHTML = '<i class="bi bi-moon-fill"></i>';
+        } else {
+          themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+        }
+        content.classList.remove('flip');
+      }, 300);
+    }
+
+    themeBtn.addEventListener('click', toggleTheme);
+
+    // Initialize theme icon
+    if (document.body.classList.contains('dark-theme')) {
+      themeBtn.innerHTML = '<i class="bi bi-moon-fill"></i>';
+    } else {
+      themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+    }
+
+    // Sidebar toggle logic
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+
+    function updateMainContentMargin() {
+      if (sidebar.classList.contains('collapsed')) {
+        mainContent.classList.remove('expanded');
+        mainContent.classList.add('collapsed');
+      } else {
+        mainContent.classList.remove('collapsed');
+        mainContent.classList.add('expanded');
+      }
+    }
+    updateMainContentMargin();
+
+    sidebarToggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      updateMainContentMargin();
+    });
+
+  </script>
+</body>
+</html>
