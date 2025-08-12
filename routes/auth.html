@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+ <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, viewport-fit=cover">
+ <!-- Add this to head section -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"></noscript>
+
   <title>Tukopax — Vault Auth Experience</title>
 
   <!-- Bootstrap CSS -->
@@ -325,11 +331,85 @@
     .auth-footer { text-align:center; font-size:0.9rem; color:var(--muted); margin-top:8px; }
 
     /* tiny responsiveness */
-    @media (max-width: 980px) {
-      .vault-wrap { grid-template-columns:1fr; max-width:900px; }
-      .panel-brand { order:2; }
-      .panel-auth { order:1; }
-    }
+   /* Add this to your media query section */
+   /* Add this to your existing media queries */
+@media (max-width: 980px) {
+  .vault-wrap {
+    grid-template-columns: 1fr !important;
+    max-width: 100% !important;
+  }
+  .panel-brand {
+    order: 2;
+    margin-top: 1.5rem;
+  }
+  .panel-auth {
+    order: 1;
+  }
+  .vault-door {
+    width: 120px !important;
+    height: 120px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .brand .logo {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 16px !important;
+  }
+  .auth-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+  .social-row {
+    flex-direction: column;
+  }
+  .social-btn {
+    width: 100% !important;
+  }
+}
+@media (max-width: 768px) {
+  body {
+    padding: 1rem !important;
+    display: block !important;
+    perspective: none !important;
+  }
+  .vault-wrap {
+    gap: 1.5rem !important;
+  }
+  .panel-brand, .panel-auth {
+    min-height: auto !important;
+    padding: 1.5rem !important;
+  }
+}@media (max-width: 576px) {
+  .form-control, .form-select, .btn {
+    padding: 0.75rem !important;
+  }
+  .otp-box {
+    width: 48px !important;
+    height: 48px !important;
+  }
+}
+
+/* Add this to your style section */
+
+@media (max-width: 768px) {
+  .nav-link, .btn, .social-btn, .muted-link {
+    min-height: 48px !important;
+    min-width: 48px !important;
+  }
+  .social-btn, .btn-primary-tuk {
+    padding: 0.75rem 1rem !important;
+  }
+  /* Prevent mobile keyboard issues */
+  body {
+    position: relative;
+    width: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 
     /* small helpers for hidden states */
     .hidden { display:none !important; }
@@ -422,12 +502,22 @@
   border-color: var(--border);
   box-shadow: none;
 }
-  </style>
+  
+/* === Accessibility & theme-readability fixes === */
+.panel-auth, .panel-brand, .form-card { color: var(--text); }
+.panel-auth .auth-sub, .brand p, .auth-footer, .muted-link { color: var(--muted); }
+.form-control::placeholder { color: var(--muted); opacity: .9; }
+/* ensure vault door text stays visible in both themes */
+.vault-door { color: var(--text); }
+/* stronger focus outlines for keyboard navigation */
+:focus { outline: 3px solid rgba(0,0,0,0.06); outline-offset: 2px; }
+</style>
 </head>
 <body class="">
 
   <!-- Vault container (two panels) -->
-  <div class="vault-wrap" id="vaultWrap" role="application" aria-labelledby="authTitle">
+   <!-- Update the vault-wrap grid to be single column on mobile -->
+    <div class="vault-wrap" id="vaultWrap" role="application" aria-labelledby="authTitle" >
 
     <!-- LEFT: Branding / Story -->
     <aside class="panel-brand" aria-hidden="false">
@@ -585,7 +675,7 @@
           <div class="mb-2">
     <label class="form-label">Country</label>
     <div class="country-selector">
-        <div class="selected-country form-control d-flex align-items-center" data-bs-toggle="dropdown">
+        <div class="selected-country form-control d-flex align-items-center" data-bs-toggle="dropdown" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" id="selectedCountryBtn">
             <span class="flag me-2">🇺🇸</span>
             <span class="country-name flex-grow-1">United States</span>
             <span class="country-code">+1</span>
@@ -935,6 +1025,14 @@
         body.classList.toggle('dark-theme');
         const isDark = body.classList.contains('dark-theme');
         localStorage.setItem('tukopax_theme', isDark ? 'dark' : 'light');
+        // update theme button label/icon for accessibility
+        if(themeBtnHeader){
+          themeBtnHeader.innerHTML = isDark 
+            ? '<i class="bi bi-sun-fill"></i><span class="ms-2" style="font-weight:700;">Light</span>'
+            : '<i class="bi bi-moon-stars-fill"></i><span class="ms-2" style="font-weight:700;">Theme</span>';
+          themeBtnHeader.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+          themeBtnHeader.setAttribute('title', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+        }
       }, 280);
       setTimeout(()=> body.classList.remove('flip'), 800);
     }
@@ -1044,37 +1142,7 @@ loginForm.addEventListener('submit', async (e)=>{
     });
 
     /*********************** Login flow (mock) ************************************/
-    loginForm.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const email = loginEmail.value.trim();
-      const password = loginPassword.value;
-
-      if(!email || !password){
-        showToast('Please provide email and password');
-        return;
-      }
-
-      // simulate server auth
-      showToast('Signing in...');
-      try {
-        const resp = await fakeApi.signIn({ email, password });
-        // server requests verification step (OTP or 2FA)
-        if(resp.requiresVerification){
-          // mark current user
-          simulatedUser = { email, id: resp.userId, verified: false };
-          // enable verify tab and switch to it
-          tabVerify.disabled = false;
-          switchTab('verify');
-          startOtpCountdown();
-          showToast('Verification code sent to email (simulated)');
-        } else {
-          // fully authenticated -> redirect to dashboard
-          completeAuth(resp.userId, resp.token);
-        }
-      } catch(err){
-        showToast(err.message || 'Sign in failed');
-      }
-    });
+    
 
     /*********************** Signup flow (mock) ************************************/
     document.getElementById('signupSubmit').addEventListener('click', async ()=>{
@@ -1160,7 +1228,7 @@ loginForm.addEventListener('submit', async (e)=>{
 
     resendOtp.addEventListener('click', ()=> {
       // simulate resend
-      simulatedOtp = fakeApi.generateOtp(); // new code
+      simulatedOtp =  // new code
       startOtpCountdown(30);
       showToast('Verification code resent (simulated).');
     });
@@ -1444,10 +1512,25 @@ loginForm.addEventListener('submit', async (e)=>{
     /*********************** Country Selector ************************/
 function initCountrySelector() {
     const countrySelector = document.querySelector('.country-selector');
+    if(!countrySelector) return;
     const selectedCountry = countrySelector.querySelector('.selected-country');
+    const dropdownMenu = countrySelector.querySelector('.dropdown-menu');
     const dropdownItems = countrySelector.querySelectorAll('.dropdown-item');
     const searchInput = countrySelector.querySelector('.search-country');
     const hiddenSelect = countrySelector.querySelector('#signupCountry');
+
+    // make selectedCountry keyboard accessible
+    selectedCountry.setAttribute('tabindex','0');
+    selectedCountry.setAttribute('role','button');
+    selectedCountry.setAttribute('aria-haspopup','listbox');
+    selectedCountry.setAttribute('aria-expanded','false');
+
+    if (window.innerWidth < 768) {
+        selectedCountry.style.padding = "0.75rem";
+        dropdownItems.forEach(item => {
+            item.style.padding = "0.75rem 1rem";
+        });
+    }
 
     // Handle country selection
     dropdownItems.forEach(item => {
@@ -1456,42 +1539,72 @@ function initCountrySelector() {
             const name = item.dataset.name;
             const code = item.dataset.code;
             const flag = item.dataset.flag;
-            
+
             // Update selected country display
             selectedCountry.querySelector('.flag').textContent = flag;
             selectedCountry.querySelector('.country-name').textContent = name;
             selectedCountry.querySelector('.country-code').textContent = code;
-            
+
             // Update hidden select
             hiddenSelect.value = name;
+
+            // close dropdown
+            dropdownMenu.classList.remove('show');
+            selectedCountry.setAttribute('aria-expanded','false');
         });
     });
 
     // Handle search
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        dropdownItems.forEach(item => {
-            const name = item.dataset.name.toLowerCase();
-            const code = item.dataset.code.toLowerCase();
-            if (name.includes(searchTerm) || code.includes(searchTerm)) {
-                item.style.display = 'flex';
-            } else {
-                item.style.display = 'none';
-            }
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            dropdownItems.forEach(item => {
+                const name = item.dataset.name.toLowerCase();
+                const code = item.dataset.code.toLowerCase();
+                if (name.includes(searchTerm) || code.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         });
+    }
+
+    // Toggle dropdown when clicking selected area
+    selectedCountry.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+        const isShown = dropdownMenu.classList.contains('show');
+        selectedCountry.setAttribute('aria-expanded', isShown ? 'true' : 'false');
+        // focus search input when opened
+        if(isShown){
+            const si = dropdownMenu.querySelector('.search-country');
+            if(si) si.focus();
+        }
+    });
+
+    // keyboard support
+    selectedCountry.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' '){
+            e.preventDefault();
+            selectedCountry.click();
+        } else if(e.key === 'ArrowDown'){
+            e.preventDefault();
+            const first = dropdownMenu.querySelector('.dropdown-item');
+            if(first) first.focus();
+        }
     });
 
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
         if (!countrySelector.contains(e.target)) {
-            const dropdownMenu = countrySelector.querySelector('.dropdown-menu');
             dropdownMenu.classList.remove('show');
+            selectedCountry.setAttribute('aria-expanded','false');
         }
     });
 
     // Mobile optimization: make dropdown full width on small screens
     if (window.innerWidth < 768) {
-        const dropdownMenu = countrySelector.querySelector('.dropdown-menu');
         dropdownMenu.style.width = '100%';
         dropdownMenu.style.left = '0';
         dropdownMenu.style.right = '0';
@@ -1500,13 +1613,10 @@ function initCountrySelector() {
 
 /*********************** Initialization ***************************/
 // pre-generate OTP (simulated)
-fakeApi.generateOtp();
+
 
 // when page loads, autofocus first input and initialize country selector
-window.addEventListener('load', ()=> {
-    focusFirstInput(panelLogin);
-    initCountrySelector();
-});
+
 
     /*********************** Initialization ***************************/
     // Add this to your initialization section
@@ -1518,20 +1628,7 @@ document.getElementById('togglePassword')?.addEventListener('click', function() 
   this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
 });
 // Update this in your initialization section
-window.addEventListener('load', ()=> {
-  focusFirstInput(panelLogin);
-  initCountrySelector();
-  
-  // Initialize password toggle if it exists
-  if (document.getElementById('togglePassword')) {
-    document.getElementById('togglePassword').addEventListener('click', function() {
-      const passwordInput = document.getElementById('loginPassword');
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      this.innerHTML = type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
-    });
-  }
-});
+
     // pre-generate OTP (simulated)
     fakeApi.generateOtp();
 
